@@ -4,22 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0f494d44-7622-4789-a341-22a05decf8c1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Can2Csv.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_dashboard.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/CAN1_DA_lw.dbc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/CAN1_DA_sw.dbc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/beispiel1.MF4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/decode_mf4.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/data/CAN1_DA_lw.dbc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/data/beispiel1.dbc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/data/beispiel1.mf4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/data/beispiel1_decoded.mf4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_decode_mf4.py" afterDir="false" />
+    <list default="true" id="0f494d44-7622-4789-a341-22a05decf8c1" name="Changes" comment="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten">
+      <changelist_data name="fannyalb" email="fanny.albrecht@aon.at" automatic="false" />
+      <change afterPath="$PROJECT_DIR$/src/can2csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/decode_mf4.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cantransform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_decode_mf4.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_cantransform.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +24,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="fannyalb &lt;fanny.albrecht@aon.at&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
@@ -51,9 +46,12 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python tests.Python tests for tests.test_decode_mf4.test_decode_file.executor": "Run",
+    "Python tests.Python tests in test_cantransform.py.executor": "Run",
     "Python tests.Python tests in test_decode_mf4.py.executor": "Run",
     "Python tests.pytest in PyCharm Community Edition 2025.2.5.executor": "Run",
+    "Python tests.pytest in test_cantransform.py.executor": "Run",
     "Python tests.pytest in test_decode_mf4.py.executor": "Run",
+    "Python.can2csv.executor": "Run",
     "Python.decode_mf4.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -75,8 +73,8 @@
       <recent name="C:\Users\Fanny\projects\Can2Csv\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.decode_mf4">
-    <configuration name="decode_mf4" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.can2csv">
+    <configuration name="can2csv" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Can2Csv" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -89,7 +87,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/decode_mf4.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/can2csv.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -98,7 +96,44 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_decode_mf4.py" type="tests" factoryName="py.test" nameIsGenerated="true">
+    <configuration name="cantransform" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Can2Csv" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="C:\Users\Fanny\projects\Can2Csv\src\cantransform.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_cantransform.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="Can2Csv" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_cantransform.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_cantransform.py" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="Can2Csv" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -112,17 +147,21 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_decode_mf4.py&quot;" />
+      <option name="_new_target" value="&quot;C:\\Users\\Fanny\\projects\\Can2Csv\\tests\\test_cantransform.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.decode_mf4" />
-      <item itemvalue="Python tests.pytest in test_decode_mf4.py" />
+      <item itemvalue="Python.can2csv" />
+      <item itemvalue="Python.cantransform" />
+      <item itemvalue="Python tests.pytest in test_cantransform.py" />
+      <item itemvalue="Python tests.Python tests in test_cantransform.py" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.decode_mf4" />
+        <item itemvalue="Python.can2csv" />
+        <item itemvalue="Python tests.Python tests in test_cantransform.py" />
+        <item itemvalue="Python.cantransform" />
       </list>
     </recent_temporary>
   </component>
@@ -141,6 +180,19 @@
       <option name="presentableId" value="Default" />
       <updated>1768985904053</updated>
     </task>
+    <task id="LOCAL-00001" summary="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten">
+      <option name="closed" value="true" />
+      <created>1769008989027</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769008989027</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten" />
+    <option name="LAST_COMMIT_MESSAGE" value="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten" />
   </component>
 </project>

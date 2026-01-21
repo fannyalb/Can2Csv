@@ -25,24 +25,34 @@ def decode_file(mdf_file, dbc_file):
 
     return decoded
 
+def decode_files(mdf_file, dbc_file):
+    if not path.isfile(mdf_file):
+        print(f'{mdf_file} ist keine valide Datei')
+    if not path.isfile(dbc_file):
+        print(f'{dbc_file} ist keine valide Datei')
+
+    dbs = {
+        "CAN": [(dbc_file, 0)],
+    }
+    with MDF(mdf_file) as mdf:
+        decoded = mdf.extract_bus_logging(database_files=dbs)
+
+    return decoded
+
 def get_single_channel_df(decoded_mdf: MDF, signal_name: str):
-    signal = decoded_mdf.get(signal_name)
-    values = signal.samples
-    times = signal.timestamps
-    time_start = decoded_mdf.start_time
-    timestamps = [time_start + timedelta(seconds=t) for t in times]
-    dataframe = pd.DataFrame({"Time": timestamps, signal_name: values})
-    return dataframe
+    df = decoded_mdf.to_dataframe(
+        channels=[signal_name],
+        time_as_date=True
+    )
+    return df
 
 def get_signals_df(decoded_mdf: MDF, signal_names: list[str]):
-#     signal = decoded_mdf.get(signal_name)
-#     values = signal.samples
-#     times = signal.timestamps
-#     time_start = decoded_mdf.start_time
-#     timestamps = [time_start + timedelta(seconds=t) for t in times]
-#     dataframe = pd.DataFrame({"Time": timestamps, signal_name: values})
-    dataframe = None
-    return dataframe
+    df = decoded_mdf.to_dataframe(
+        channels=signal_names,
+        time_as_date=True
+    )
+    print(df)
+    return df
 
 def print_signal(signal_df):
     signal_name = signal_df.columns[1]
@@ -79,4 +89,4 @@ def sonstiges():
 
         # for ch in mdf.channels_db if "CAN"
 
-main()
+
