@@ -1,0 +1,191 @@
+{
+  "time_settings": {
+    "default_range_hours": 8,
+    "auto_extend": true
+  },
+
+  "controls": [
+    {
+      "type": "datetime",
+      "id": "input-time-from",
+      "label": "Von",
+      "default": "now-8h"
+    },
+    {
+      "type": "datetime",
+      "id": "input-time-to",
+      "label": "Bis",
+      "default": "now"
+    },
+    {
+      "type": "button",
+      "id": "btn-load",
+      "label": "Laden"
+    },
+    {
+      "type": "checkbox",
+      "id": "checkbox-live-mode",
+      "label": "Fortlaufend (Live-Modus)"
+    }
+  ],
+
+  "machines": [
+    {
+      "name": "Laufwagen Schwarz",
+      "device_id": "C1667112",
+      "dbc_file": "CAN1_DA_lw.dbc",
+      "signals": [
+        {
+          "name": "SOC",
+          "signal_id": "Gerneral_LD_StateOfCharge",
+          "label": "SOC_lw (%)",
+          "unit": "%",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Current",
+          "signal_id": "Bat_LD_Current",
+          "label": "Strom_lw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Voltage",
+          "signal_id": "Bat_LD_Voltage",
+          "label": "Spannung_lw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "weight",
+          "signal_id": "General_LD_MeassuredWeight",
+          "label": "Gewichte",
+          "unit": "kg",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "speed",
+          "signal_id": "MotorDrive_LD_ActualSpeed",
+          "label": "speed_lw",
+          "unit": "m/s",
+          "source": "backend",
+          "scaling_factor": 0.1
+        },
+        {
+          "name": "lift_motor",
+          "signal_id": "MotorLift_LD_ActualSpeed",
+          "label": "Hubwinde",
+          "unit": "rpm",
+          "source": "backend",
+          "scaling_factor": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Laufwagen Grün",
+      "device_id": "F60FE067",
+      "dbc_file": "CAN1_DA_lw.dbc",
+      "signals": [
+        {
+          "name": "SOC",
+          "signal_id": "Gerneral_LD_StateOfCharge",
+          "label": "SOC_lw (%)",
+          "unit": "%",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Current",
+          "signal_id": "Bat_LD_Current",
+          "label": "Strom_lw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Voltage",
+          "signal_id": "Bat_LD_Voltage",
+          "label": "Spannung_lw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "weight",
+          "signal_id": "General_LD_MeassuredWeight",
+          "label": "Gewichte",
+          "unit": "kg",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "speed",
+          "signal_id": "MotorDrive_LD_ActualSpeed",
+          "label": "speed_lw",
+          "unit": "m/s",
+          "source": "backend",
+          "scaling_factor": 0.1
+        },
+        {
+          "name": "lift_motor",
+          "signal_id": "MotorLift_LD_ActualSpeed",
+          "label": "Hubwinde",
+          "unit": "rpm",
+          "source": "backend",
+          "scaling_factor": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Schlittenwinde",
+      "device_id": "31C58438",
+      "dbc_file": "CAN1_DA_sw.dbc",
+      "signals": [
+        {
+          "name": "Drehzahl",
+          "signal_id": "MotorWinch_ST_ActualSpeed",
+          "label": "speed_sw",
+          "unit": "1/min",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Current",
+          "signal_id": "Bat_ST_TotalCurrent",
+          "label": "Strom_sw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+          "name": "Voltage",
+          "signal_id": "Bat_ST_AvgVoltage",
+          "label": "Spannung_sw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+        "name": "Haspel",
+          "signal_id": "General_LD_TrommelSpeed",
+          "label": "Haspel_Drehzahl_sw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        },
+        {
+        "name": "SOC_schlittenwinde",
+          "signal_id": "General_LD_StateOfCharge",
+          "label": "SOC_sw",
+          "unit": "A",
+          "source": "backend",
+          "scaling_factor": 1.0
+        }
+      ]
+    }
+  ]
+}
