@@ -21,9 +21,10 @@ class MF4ExporterApp(tk.Tk):
         self.dbc_file = None
         self.mf4_paths = []
         self.available_signals = []
-        self.decoded_mdfs = []
+        # self.decoded_mdfs = []
         self.mdf_min_time = None
         self.mdf_max_time = None
+        self.out_dir = None
 
         self._build_ui()
 
@@ -45,9 +46,9 @@ class MF4ExporterApp(tk.Tk):
 
         # MF4 folder
         ttk.Label(frm, text="oder Ordner:").grid(row=2, column=0, sticky="w")
-        self.folder_entry = ttk.Entry(frm, width=75)
-        self.folder_entry.grid(row=2, column=1, sticky="w")
-        ttk.Button(frm, text="Ordner wählen", command=self.select_folder).grid(row=2, column=2)
+        self.mf4_folder_entry = ttk.Entry(frm, width=75)
+        self.mf4_folder_entry.grid(row=2, column=1, sticky="w")
+        ttk.Button(frm, text="Ordner wählen", command=self.select_mf4_folder).grid(row=2, column=2)
 
         # Load signals
         ttk.Button(frm, text="Signale laden", command=self.load_signals).grid(row=5, column=0, pady=5)
@@ -56,17 +57,29 @@ class MF4ExporterApp(tk.Tk):
         self.signal_listbox = tk.Listbox(frm, selectmode=tk.MULTIPLE, width=90, height=15)
         self.signal_listbox.grid(row=8, column=0, columnspan=3, sticky="w")
 
-        # Time range as string fields
-        ttk.Label(frm, text=f"Von:").grid(row=6, column=0, sticky="w")
-        self.from_entry = ttk.Entry(frm, width=25)
-        self.from_entry.grid(row=6, column=1, sticky="w")
+        # # Time range as string fields
+        # ttk.Label(frm, text=f"Von:").grid(row=6, column=0, sticky="w")
+        # self.from_entry = ttk.Entry(frm, width=25)
+        # self.from_entry.grid(row=6, column=1, sticky="w")
+        #
+        # ttk.Label(frm, text=f"Bis:").grid(row=7, column=0, sticky="w")
+        # self.to_entry = ttk.Entry(frm, width=25)
+        # self.to_entry.grid(row=7, column=1, sticky="w")
 
-        ttk.Label(frm, text=f"Bis:").grid(row=7, column=0, sticky="w")
-        self.to_entry = ttk.Entry(frm, width=25)
-        self.to_entry.grid(row=7, column=1, sticky="w")
+        # Export-Folder
+        ttk.Label(frm, text="Export-Ordner").grid(row=12, column=0, sticky="w")
+        self.csv_folder_entry = ttk.Entry(frm, width=75)
+        self.csv_folder_entry.grid(row=12, column=1, sticky="w")
+        ttk.Button(frm, text="Ordner wählen", command=self.select_csv_folder).grid(row=12, column=2)
 
-        # Export
-        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=12, column=0, pady=10)
+        # Export-Dateiname
+        ttk.Label(frm, text="Export-Dateiname").grid(row=13, column=0, sticky="w")
+        self.csv_filename_entry = ttk.Entry(frm, width=75)
+        self.csv_filename_entry.grid(row=13, column=1, sticky="w")
+        self.csv_filename_entry.insert(0, "output.csv")
+
+        # Export-Button
+        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=15, column=0, pady=10)
 
     def select_dbc(self):
         path = filedialog.askopenfilename(filetypes=[("DBC files", "*.dbc")])
@@ -81,14 +94,14 @@ class MF4ExporterApp(tk.Tk):
         if path:
             self.mf4_entry.delete(0, tk.END)
             self.mf4_entry.insert(0, path)
-            self.folder_entry.delete(0, tk.END)
+            self.mf4_folder_entry.delete(0, tk.END)
             self.mf4_paths = [path]
 
-    def select_folder(self):
+    def select_mf4_folder(self):
         path = filedialog.askdirectory()
         if path:
-            self.folder_entry.delete(0, tk.END)
-            self.folder_entry.insert(0, path)
+            self.mf4_folder_entry.delete(0, tk.END)
+            self.mf4_folder_entry.insert(0, path)
             self.mf4_entry.delete(0, tk.END)
             self.mf4_paths = [
                 os.path.join(root, f)
@@ -97,6 +110,13 @@ class MF4ExporterApp(tk.Tk):
                 if f.lower().endswith(".mf4")
             ]
             messagebox.showinfo("MF4-Dateien", f"{len(self.mf4_paths)} MF4-Dateien gefunden (rekursiv).")
+
+    def select_csv_folder(self):
+        path = filedialog.askdirectory()
+        if path:
+            self.csv_folder_entry.delete(0, tk.END)
+            self.csv_folder_entry.insert(0, path)
+            self.out_dir = path
 
     def load_signals(self):
         if not self.mf4_paths:
@@ -115,8 +135,8 @@ class MF4ExporterApp(tk.Tk):
             start = start.replace(tzinfo=ZoneInfo("UTC"))
         start_cet = start.astimezone(ZoneInfo("Europe/Berlin"))
 
-        self.find_min_max_datetime()
-        self.set_min_max_datetime()
+        # self.find_min_max_datetime()
+        # self.set_min_max_datetime()
 
     def find_min_max_datetime(self):
         if not self.mf4_paths:
@@ -147,39 +167,50 @@ class MF4ExporterApp(tk.Tk):
             messagebox.showerror("Fehler", "Bitte mindestens ein Signal wählen")
             return
 
-        out_dir = filedialog.askdirectory(title="Zielordner wählen")
-        if not out_dir:
+        if not self.out_dir:
+            messagebox.showerror("Fehler", "Bitte keinen Output-Ordner gewählt")
             return
 
-        try:
-            from_dt = self._get_cet_datetime(self.from_date, self.from_hour, self.from_min, self.from_sec)
-            to_dt = self._get_cet_datetime(self.to_date, self.to_hour, self.to_min, self.to_sec)
-        except ValueError as e:
-            messagebox.showerror("Fehler", str(e))
-            return
+        out_filename = self.csv_filename_entry.get()
 
-        if from_dt >= to_dt:
-            messagebox.showerror("Fehler", "'Von' muss vor 'Bis' liegen")
-            return
+        if not out_filename:
+            messagebox.showerror("Fehler", "Bitte Ausgabe-Dateinamen angeben")
 
-        for mf4 in self.mf4_paths:
-            mdf = MDF(mf4)
+        if not out_filename.endswith(".csv"):
+            out_filename = out_filename + ".csv"
 
-            start_time = mdf.start_time
-            if start_time.tzinfo is None:
-                start_time = start_time.replace(tzinfo=ZoneInfo("UTC"))
+        # try:
+        #     from_dt = self._get_cet_datetime(self.from_date, self.from_hour, self.from_min, self.from_sec)
+        #     to_dt = self._get_cet_datetime(self.to_date, self.to_hour, self.to_min, self.to_sec)
+        # except ValueError as e:
+        #     messagebox.showerror("Fehler", str(e))
+        #     return
 
-            t_from = (from_dt.astimezone(start_time.tzinfo) - start_time).total_seconds()
-            t_to = (to_dt.astimezone(start_time.tzinfo) - start_time).total_seconds()
+        # if from_dt >= to_dt:
+        #     messagebox.showerror("Fehler", "'Von' muss vor 'Bis' liegen")
+        #     return
 
-            mdf_cut = mdf.cut(start=t_from, stop=t_to)
+        # for mf4 in self.mf4_paths:
+        #     mdf = MDF(mf4)
+        #
+        #     start_time = mdf.start_time
+        #     if start_time.tzinfo is None:
+        #         start_time = start_time.replace(tzinfo=ZoneInfo("UTC"))
+        #
+        #     t_from = (from_dt.astimezone(start_time.tzinfo) - start_time).total_seconds()
+        #     t_to = (to_dt.astimezone(start_time.tzinfo) - start_time).total_seconds()
+        #
+        #     mdf_cut = mdf.cut(start=t_from, stop=t_to)
+        #
+        #     df = mdf_cut.to_dataframe(channels=selected)
+        #     base = os.path.splitext(os.path.basename(mf4))[0]
+        #     out_path = os.path.join(out_dir, base + ".csv")
+        #     df.to_csv(out_path, index=False)
+        out_path = os.path.join(self.out_dir, out_filename)
+        decoded_files = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
+        filenames = export_to_csv(out_path, decoded_files, selected)
 
-            df = mdf_cut.to_dataframe(channels=selected)
-            base = os.path.splitext(os.path.basename(mf4))[0]
-            out_path = os.path.join(out_dir, base + ".csv")
-            df.to_csv(out_path, index=False)
-
-        messagebox.showinfo("Fertig", "CSV Export abgeschlossen")
+        messagebox.showinfo("Fertig", f'CSV Export nach {filenames[0]} abgeschlossen')
 
 
 if __name__ == "__main__":
