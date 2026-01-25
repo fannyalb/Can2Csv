@@ -88,6 +88,19 @@ def get_mdf_min_max_time(decoded_mdf: MDF) :
     max_time= to_cet(df.index[-1])
     return min_time,max_time
 
+def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list[str]):
+    mdf_df_list = []
+    for decoded_mdf in decoded_mdfs:
+        decoded_mdf.start_time = to_cet(decoded_mdf.start_time)
+        mdf_df = decoded_mdf.to_dataframe(channels=selected_signals, time_as_date=True, )
+        mdf_df_list.append(mdf_df)
+    all_mdfs_df = pd.concat(mdf_df_list,
+                            axis=0
+                            ).sort_index()
+
+    all_mdfs_df.to_csv(filename, date_format="%Y-%m-%d %H:%M:%S.%f%z")
+    return [filename]
+
 def to_cet(dt : datetime) -> datetime:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=ZoneInfo("UTC"))

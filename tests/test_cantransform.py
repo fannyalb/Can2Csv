@@ -1,3 +1,6 @@
+import csv
+import os
+
 import asammdf
 import pytest
 from asammdf import MDF
@@ -10,6 +13,7 @@ TEST_DBC_FILE = "data/beispiel1.dbc"
 TEST_DECODED_MDF_FILE = "data/beispiel1_decoded.mf4"
 TEST_DECODED_MDF_FILE2 = "data/typ1_bsp2_decoded.mf4"
 TEST_SIGNAL_TROMMEL_POS = "General_LD_TrommelPositoin"
+TEST_BSP1_CSV_BATTERY_INFO = "data/beispiel1_batteryInfo.csv"
 
 
 def test_decode_file_returns_mdf_object():
@@ -85,3 +89,49 @@ def test_get_mdfs_min_max_time():
     print(f'Max: {max_dt}')
     assert soll_min == min_dt
     assert soll_max == max_dt
+
+
+def test_export_to_csv_one_file():
+    csv_filename="testoutput.csv"
+    if path.isfile(csv_filename):
+        os.remove(csv_filename)
+    decoded_mdf = MDF(TEST_DECODED_MDF_FILE)
+    signals =  ["Bat_ST_AvgVoltage", "Bat_ST_HighestCellTemp", "Bat_ST_LowestCellTemp", "Bat_ST_TotalCurrent"]
+    result = export_to_csv("testoutput.csv", [decoded_mdf], signals)
+
+    # expected = pd.read_csv(TEST_BSP1_CSV_BATTERY_INFO)
+    actual = pd.read_csv(result[0])
+
+    print(f'Actual: {actual}')
+    assert actual['Bat_ST_AvgVoltage'] is not None
+    assert actual['timestamps'][2] == "2025-12-17 10:05:00.225400+0100"
+    assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
+    assert actual['Bat_ST_TotalCurrent'][18] == -0.5
+
+
+def test_export_to_csv_2_files():
+    csv_filename="testoutput2.csv"
+    if path.isfile(csv_filename):
+        os.remove(csv_filename)
+    decoded_mdf = MDF(TEST_DECODED_MDF_FILE)
+    decoded_mdf2= MDF(TEST_DECODED_MDF_FILE2)
+    decoded_mdfs = [decoded_mdf,decoded_mdf2]
+    signals = ["Bat_ST_AvgVoltage", "Bat_ST_HighestCellTemp", "Bat_ST_LowestCellTemp", "Bat_ST_TotalCurrent"]
+    results = export_to_csv("testoutput2.csv", decoded_mdfs, signals)
+
+    assert len(results) == 1
+    assert results[0] is not None
+    for csv_file in results:
+        actual = pd.read_csv(csv_file)
+
+        print(f'Actual: {actual}')
+        assert actual['Bat_ST_AvgVoltage'] is not None
+        assert actual['timestamps'][2] == "2025-12-17 10:05:00.225400+0100"
+        assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
+        assert actual['Bat_ST_TotalCurrent'][18] == -0.5
+
+    # print(f'Expected: {line_exp}')
+    # assert line_exp[0] == line_act[0]
+    # assert line_exp[1] == line_act[1]
+    # assert line_exp[2] == line_act[2]
+    # assert line_exp[3] == line_act[3]

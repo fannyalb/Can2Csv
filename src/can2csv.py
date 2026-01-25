@@ -129,9 +129,7 @@ class MF4ExporterApp(tk.Tk):
             print(start_time)
             min_time = min(min_time, start_time) if min_time is not None else start_time
             max_time = max(max_time, start_time) if max_time is not None else start_time
-        # mdfs = [ MDF(mdf) for mdf in self.mf4_paths]
 
-        # self.decoded_mdfs = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
         self.mdf_min_time, self.mdf_max_time = min_time, max_time
 
     def set_min_max_datetime(self):

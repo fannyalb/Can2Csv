@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0f494d44-7622-4789-a341-22a05decf8c1" name="Changes" comment="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten">
-      <changelist_data name="fannyalb" email="fanny.albrecht@aon.at" automatic="false" />
-      <change afterPath="$PROJECT_DIR$/src/can2csv.py" afterDir="false" />
+    <list default="true" id="0f494d44-7622-4789-a341-22a05decf8c1" name="Changes" comment="Datumsberechnung im UI funktioniert">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/decode_mf4.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cantransform.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_decode_mf4.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_cantransform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/can2csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/can2csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cantransform.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cantransform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/beispiel1_decoded.mf4" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/beispiel1_decoded.mf4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_cantransform.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_cantransform.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,9 +34,9 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/.venv/pyvenv.cfg" root0="SKIP_INSPECTION" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="38YoXL1S1BUvFNOW2eczcoj5F1K" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -45,6 +45,10 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests for tests.test_cantransform.test_decode_file_returns_mdf_object.executor": "Run",
+    "Python tests.Python tests for tests.test_cantransform.test_export_to_csv.executor": "Run",
+    "Python tests.Python tests for tests.test_cantransform.test_export_to_csv_2_files.executor": "Run",
+    "Python tests.Python tests for tests.test_cantransform.test_get_single_channel_df.executor": "Run",
     "Python tests.Python tests for tests.test_decode_mf4.test_decode_file.executor": "Run",
     "Python tests.Python tests in test_cantransform.py.executor": "Run",
     "Python tests.Python tests in test_decode_mf4.py.executor": "Run",
@@ -55,6 +59,7 @@
     "Python.decode_mf4.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
     "last_opened_file_path": "C:/Users/Fanny/projects/Can2Csv/tests/data",
     "settings.editor.selected.configurable": "preferences.pluginManager"
@@ -73,7 +78,7 @@
       <recent name="C:\Users\Fanny\projects\Can2Csv\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.can2csv">
+  <component name="RunManager" selected="Python tests.Python tests in test_cantransform.py">
     <configuration name="can2csv" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Can2Csv" />
       <option name="ENV_FILES" value="" />
@@ -96,26 +101,64 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="cantransform" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests for tests.test_cantransform.test_decode_file_returns_mdf_object" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="Can2Csv" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\Fanny\projects\Can2Csv\src\cantransform.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_cantransform.test_decode_file_returns_mdf_object&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for tests.test_cantransform.test_export_to_csv" type="tests" factoryName="Autodetect" nameIsGenerated="true">
+      <module name="Can2Csv" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_cantransform.test_export_to_csv&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for tests.test_cantransform.test_export_to_csv_2_files" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="Can2Csv" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_cantransform.test_export_to_csv_2_files&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for tests.test_cantransform.test_get_single_channel_df" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="Can2Csv" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_cantransform.test_get_single_channel_df&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <configuration name="Python tests in test_cantransform.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
@@ -124,7 +167,7 @@
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -153,15 +196,20 @@
     </configuration>
     <list>
       <item itemvalue="Python.can2csv" />
-      <item itemvalue="Python.cantransform" />
+      <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_export_to_csv" />
       <item itemvalue="Python tests.pytest in test_cantransform.py" />
+      <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_export_to_csv_2_files" />
+      <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_decode_file_returns_mdf_object" />
+      <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_get_single_channel_df" />
       <item itemvalue="Python tests.Python tests in test_cantransform.py" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.can2csv" />
         <item itemvalue="Python tests.Python tests in test_cantransform.py" />
-        <item itemvalue="Python.cantransform" />
+        <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_export_to_csv_2_files" />
+        <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_get_single_channel_df" />
+        <item itemvalue="Python tests.Python tests for tests.test_cantransform.test_decode_file_returns_mdf_object" />
+        <item itemvalue="Python.can2csv" />
       </list>
     </recent_temporary>
   </component>
@@ -188,11 +236,29 @@
       <option name="project" value="LOCAL" />
       <updated>1769008989027</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="UI von Chatchpt">
+      <option name="closed" value="true" />
+      <created>1769012253760</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769012253760</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Datumsberechnung im UI funktioniert">
+      <option name="closed" value="true" />
+      <created>1769345631605</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1769345631605</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten" />
-    <option name="LAST_COMMIT_MESSAGE" value="Basis - MF4-Datei Decodieren, in Datenframe speichern und testhalber plotten" />
+    <MESSAGE value="UI von Chatchpt" />
+    <MESSAGE value="Datumsberechnung im UI funktioniert" />
+    <option name="LAST_COMMIT_MESSAGE" value="Datumsberechnung im UI funktioniert" />
   </component>
 </project>
