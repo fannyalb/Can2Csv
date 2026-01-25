@@ -1,6 +1,9 @@
 from datetime import timedelta
+from zoneinfo import ZoneInfo
+
 import matplotlib.pyplot as plt
 from os import path
+from datetime import datetime, time
 
 import pandas as pd
 
@@ -54,6 +57,43 @@ def get_signals_df(decoded_mdf: MDF, signal_names: list[str]):
     print(df)
     return df
 
+def get_available_signals(decoded_mdf: MDF) -> list[str]:
+    available_signals = decoded_mdf.channels_db.keys()
+    available_signals = [ sig for sig in available_signals if not (sig.__contains__(".") or sig.__eq__("time"))]
+    return available_signals
+
+def get_mdfs_min_max_time(decoded_mdfs: list[MDF]) :
+    min_time = None
+    max_time = None
+    for mdf in decoded_mdfs:
+        i_min, i_max = get_mdf_min_max_time(mdf)
+        min_time = min(min_time, i_min) if min_time is not None else i_min
+        max_time = max(max_time, i_max) if max_time is not None else i_max
+    return min_time, max_time
+
+def get_mdfs_min_max_time_approx(mdfs: list[MDF]) :
+    min_time = None
+    max_time = None
+    for mdf in mdfs:
+        start_time = mdf.start_time
+        print(start_time)
+        min_time = min(min_time, start_time) if min_time is not None else start_time
+        max_time = max(max_time, start_time) if max_time is not None else start_time
+    return min_time, max_time
+
+def get_mdf_min_max_time(decoded_mdf: MDF) :
+    startzeit = decoded_mdf.start_time
+    df = decoded_mdf.to_dataframe(time_as_date=True, )
+    min_time= to_cet(df.index[0])
+    max_time= to_cet(df.index[-1])
+    return min_time,max_time
+
+def to_cet(dt : datetime) -> datetime:
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    return dt.astimezone(ZoneInfo("Europe/Berlin"))
+
+
 def print_signal(signal_df):
     signal_name = signal_df.columns[1]
     title = f'{signal_name} over Time'
@@ -70,6 +110,7 @@ def sonstiges():
         ch_grps = [ chg.keys() for chg in decoded.iter_groups()]
         channels = [ ch for ch in decoded.channels_db.keys()]
         startzeit = decoded.start_time
+        timestamps = [ startzeit + timedelta(seconds=t) for t in trommelPos.timestamps]
 
         for ch_grp in ch_grps:
             # print(ch_grp)
@@ -88,5 +129,7 @@ def sonstiges():
         # for sig_val in decoded.
 
         # for ch in mdf.channels_db if "CAN"
+
+
 
 

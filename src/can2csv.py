@@ -5,9 +5,11 @@ from asammdf import MDF
 from src.cantransform import *
 import cantools
 import os
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 from tkcalendar import DateEntry
+
+DT_FORMAT = "%Y-%m-%d %H:%M"
 
 class MF4ExporterApp(tk.Tk):
     def __init__(self):
@@ -19,6 +21,9 @@ class MF4ExporterApp(tk.Tk):
         self.dbc_file = None
         self.mf4_paths = []
         self.available_signals = []
+        self.decoded_mdfs = []
+        self.mdf_min_time = None
+        self.mdf_max_time = None
 
         self._build_ui()
 
@@ -44,36 +49,24 @@ class MF4ExporterApp(tk.Tk):
         self.folder_entry.grid(row=2, column=1, sticky="w")
         ttk.Button(frm, text="Ordner wählen", command=self.select_folder).grid(row=2, column=2)
 
-        # Time range (CET) with DateTimePicker
-        ttk.Label(frm, text="Von (CET):").grid(row=3, column=0, sticky="w")
-        self.from_date = DateEntry(frm, width=12, date_pattern="yyyy-mm-dd")
-        self.from_date.grid(row=3, column=1, sticky="w")
-        self.from_hour = ttk.Spinbox(frm, from_=0, to=23, width=3, format="%02.0f")
-        self.from_hour.grid(row=3, column=1, sticky="e", padx=(0, 110))
-        self.from_min = ttk.Spinbox(frm, from_=0, to=59, width=3, format="%02.0f")
-        self.from_min.grid(row=3, column=1, sticky="e", padx=(0, 75))
-        self.from_sec = ttk.Spinbox(frm, from_=0, to=59, width=3, format="%02.0f")
-        self.from_sec.grid(row=3, column=1, sticky="e", padx=(0, 40))
-
-        ttk.Label(frm, text="Bis (CET):").grid(row=4, column=0, sticky="w")
-        self.to_date = DateEntry(frm, width=12, date_pattern="yyyy-mm-dd")
-        self.to_date.grid(row=4, column=1, sticky="w")
-        self.to_hour = ttk.Spinbox(frm, from_=0, to=23, width=3, format="%02.0f")
-        self.to_hour.grid(row=4, column=1, sticky="e", padx=(0, 110))
-        self.to_min = ttk.Spinbox(frm, from_=0, to=59, width=3, format="%02.0f")
-        self.to_min.grid(row=4, column=1, sticky="e", padx=(0, 75))
-        self.to_sec = ttk.Spinbox(frm, from_=0, to=59, width=3, format="%02.0f")
-        self.to_sec.grid(row=4, column=1, sticky="e", padx=(0, 40))
-
         # Load signals
         ttk.Button(frm, text="Signale laden", command=self.load_signals).grid(row=5, column=0, pady=5)
 
         # Signal list
         self.signal_listbox = tk.Listbox(frm, selectmode=tk.MULTIPLE, width=90, height=15)
-        self.signal_listbox.grid(row=6, column=0, columnspan=3, sticky="w")
+        self.signal_listbox.grid(row=8, column=0, columnspan=3, sticky="w")
+
+        # Time range as string fields
+        ttk.Label(frm, text=f"Von:").grid(row=6, column=0, sticky="w")
+        self.from_entry = ttk.Entry(frm, width=25)
+        self.from_entry.grid(row=6, column=1, sticky="w")
+
+        ttk.Label(frm, text=f"Bis:").grid(row=7, column=0, sticky="w")
+        self.to_entry = ttk.Entry(frm, width=25)
+        self.to_entry.grid(row=7, column=1, sticky="w")
 
         # Export
-        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=7, column=0, pady=10)
+        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=12, column=0, pady=10)
 
     def select_dbc(self):
         path = filedialog.askopenfilename(filetypes=[("DBC files", "*.dbc")])
@@ -110,9 +103,8 @@ class MF4ExporterApp(tk.Tk):
             messagebox.showerror("Fehler", "Bitte MF4-Datei oder Ordner wählen")
             return
 
-        mdf = MDF(self.mf4_paths[0])
-        decoded_mdf = decode_file(self.mf4_paths[0], self.dbc)
-        self.available_signals = list(decoded_mdf.channels_db.keys())
+        decoded_mdf = decode_file(self.mf4_paths[0], self.dbc_file)
+        self.available_signals = get_available_signals(decoded_mdf)
         self.signal_listbox.delete(0, tk.END)
         for sig in sorted(self.available_signals):
             self.signal_listbox.insert(tk.END, sig)
@@ -123,19 +115,33 @@ class MF4ExporterApp(tk.Tk):
             start = start.replace(tzinfo=ZoneInfo("UTC"))
         start_cet = start.astimezone(ZoneInfo("Europe/Berlin"))
 
-        self.from_date.set_date(start_cet.date())
-        self.from_hour.set(start_cet.strftime("%H"))
-        self.from_min.set(start_cet.strftime("%M"))
-        self.from_sec.set(start_cet.strftime("%S"))
+        self.find_min_max_datetime()
+        self.set_min_max_datetime()
 
-    def _get_cet_datetime(self, date_entry, h_spin, m_spin, s_spin):
-        try:
-            d = date_entry.get_date()
-            t = time(int(h_spin.get()), int(m_spin.get()), int(s_spin.get()))
-            dt = datetime.combine(d, t)
-            return dt.replace(tzinfo=ZoneInfo("Europe/Berlin"))
-        except Exception:
-            raise ValueError("Ungültige Datum/Uhrzeit-Eingabe")
+    def find_min_max_datetime(self):
+        if not self.mf4_paths:
+            return
+
+        min_time = None
+        max_time = None
+        for mdf in self.mf4_paths:
+            start_time = to_cet(datetime.fromtimestamp(path.getmtime(mdf)))
+            print(start_time)
+            min_time = min(min_time, start_time) if min_time is not None else start_time
+            max_time = max(max_time, start_time) if max_time is not None else start_time
+        # mdfs = [ MDF(mdf) for mdf in self.mf4_paths]
+
+        # self.decoded_mdfs = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
+        self.mdf_min_time, self.mdf_max_time = min_time, max_time
+
+    def set_min_max_datetime(self):
+        min_dt = datetime.strftime(self.mdf_min_time, DT_FORMAT)
+        max_dt = datetime.strftime(self.mdf_max_time, DT_FORMAT)
+        self.from_entry.delete(0, tk.END)
+        self.from_entry.insert(0, min_dt)
+        self.to_entry.delete(0, tk.END)
+        self.to_entry.insert(0, max_dt)
+
 
     def export_csv(self):
         selected = [self.signal_listbox.get(i) for i in self.signal_listbox.curselection()]
