@@ -92,33 +92,15 @@ def get_mdf_min_max_time(decoded_mdf: MDF) :
     return min_time,max_time
 
 def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list[str]):
-    channel_groups = []
-    channel_grp_signals = defaultdict(list)
     bsp_mdf = decoded_mdfs[0]
-    for sig in selected_signals:
-        groups = bsp_mdf.whereis(sig)
-        if len(groups) != 1:
-            log.error(f'Signal {sig} kommt in {len(groups)} Channelgruppen vor')
-        if len(groups) == 0:
-            return None
-        group = groups[0][0]
-        channel_grp_signals[group].append(sig)
+    channel_grp_signals = get_channel_group_signals(bsp_mdf, selected_signals)
 
-    channel_groups = channel_grp_signals.keys()
-
-    mdf_df_chgrp_list = defaultdict(list)
-    for decoded_mdf in decoded_mdfs:
-        decoded_mdf.start_time = to_cet(decoded_mdf.start_time)
-        for channel_grp in channel_groups:
-            channel_sigs=channel_grp_signals[channel_grp]
-            mdf_df = decoded_mdf.to_dataframe(channels=channel_sigs, time_as_date=True, )
-            mdf_df_chgrp_list[channel_grp].append(mdf_df)
+    channel_grp_dfs = get_channel_grp_dfs(channel_grp_signals, decoded_mdfs)
 
     filenames = []
-    for channel_grp in channel_groups:
+    for channel_grp in channel_grp_signals.keys():
         grp_filename = f'{filename[0:-4]}-ChGrp_{channel_grp}.csv'
-        print(f'Filename: {grp_filename}')
-        grp_mdfs_df = pd.concat(mdf_df_chgrp_list[channel_grp],
+        grp_mdfs_df = pd.concat(channel_grp_dfs[channel_grp],
                             axis=0
                             ).sort_index()
 
@@ -126,6 +108,33 @@ def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list
         filenames.append(grp_filename)
 
     return filenames
+
+
+def get_channel_grp_dfs(channel_grp_signals: dict[int, list],
+                        decoded_mdfs: list[MDF]) -> defaultdict[int, list]:
+    channel_groups = channel_grp_signals.keys()
+    channel_grp_dfs = defaultdict(list)
+
+    for decoded_mdf in decoded_mdfs:
+        decoded_mdf.start_time = to_cet(decoded_mdf.start_time)
+        for channel_grp in channel_groups:
+            channel_sigs = channel_grp_signals[channel_grp]
+            mdf_df = decoded_mdf.to_dataframe(channels=channel_sigs, time_as_date=True, )
+            channel_grp_dfs[channel_grp].append(mdf_df)
+    return channel_grp_dfs
+
+
+def get_channel_group_signals(reference_mdf: MDF, selected_signals: list[str]) -> dict[int, list]:
+    channel_grp_signals = defaultdict(list)
+    for sig in selected_signals:
+        groups = reference_mdf.whereis(sig)
+        if len(groups) != 1:
+            log.error(f'Signal {sig} kommt in {len(groups)} Channelgruppen vor')
+        if len(groups) == 0:
+            continue
+        group = groups[0][0]
+        channel_grp_signals[group].append(sig)
+    return channel_grp_signals
 
 def to_cet(dt : datetime) -> datetime:
     if dt.tzinfo is None:
@@ -138,32 +147,3 @@ def print_signal(signal_df):
     title = f'{signal_name} over Time'
     signal_df.plot(x="Time", y=signal_name, kind="line", title=title)
     plt.show(block=True)
-
-def sonstiges():
-        decoded = decode_file(mymdf_file,dbc_file)
-        ch_grps = [ chg.keys() for chg in decoded.iter_groups()]
-        channels = [ ch for ch in decoded.channels_db.keys()]
-        startzeit = decoded.start_time
-        timestamps = [ startzeit + timedelta(seconds=t) for t in trommelPos.timestamps]
-
-        for ch_grp in ch_grps:
-            # print(ch_grp)
-            print(ch_grp)
-        for ch in channels:
-            # print(ch_grp)
-            print(ch)
-
-        trommelPos = decoded.get("General_LD_TrommelPositoin")
-        values = trommelPos.samples
-        timestamps = [ startzeit + timedelta(seconds=t) for t in trommelPos.timestamps]
-
-        print("Trommel-Position")
-        print(values[:10])
-        print(timestamps[:10])
-        # for sig_val in decoded.
-
-        # for ch in mdf.channels_db if "CAN"
-
-
-
-
