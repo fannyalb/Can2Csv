@@ -8,9 +8,9 @@ from src.cantransform import *
 import pandas as pd
 
 # Beispiel-Mockdateien (können kleine Testdateien sein)
-TEST_MDF_FILE = "data/beispiel1.mf4"
-TEST_DBC_FILE = "data/beispiel1.dbc"
-TEST_DECODED_MDF_FILE = "data/beispiel1_decoded.mf4"
+TEST_MDF_FILE = "data/typ1_bsp1.mf4"
+TEST_DBC_FILE = "data/typ1.dbc"
+TEST_DECODED_MDF_FILE = "data/typ1_bsp1_decoded.mf4"
 TEST_DECODED_MDF_FILE2 = "data/typ1_bsp2_decoded.mf4"
 TEST_SIGNAL_TROMMEL_POS = "General_LD_TrommelPositoin"
 TEST_BSP1_CSV_BATTERY_INFO = "data/beispiel1_batteryInfo.csv"
@@ -130,8 +130,22 @@ def test_export_to_csv_2_files():
         assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
         assert actual['Bat_ST_TotalCurrent'][18] == -0.5
 
-    # print(f'Expected: {line_exp}')
-    # assert line_exp[0] == line_act[0]
-    # assert line_exp[1] == line_act[1]
-    # assert line_exp[2] == line_act[2]
-    # assert line_exp[3] == line_act[3]
+def test_export_to_csv_2_channelgrps():
+    # Separate Datei pro Channel-Group
+    csv_filename = "testoutput3.csv"
+    if path.isfile(csv_filename):
+        os.remove(csv_filename)
+    decoded_mdf = MDF(TEST_DECODED_MDF_FILE)
+    decoded_mdf2 = MDF(TEST_DECODED_MDF_FILE2)
+    decoded_mdfs = [decoded_mdf, decoded_mdf2]
+    signals = ["Bat_ST_AvgVoltage", "MotorWinch_ST_ActualCurrent"]
+    results = export_to_csv(csv_filename, decoded_mdfs, signals)
+
+    assert len(results) == 2
+    assert results[0] is not None
+    csv_file = results[1]
+    actual = pd.read_csv(csv_file)
+
+    print(f'Actual: {actual}')
+    assert actual['timestamps'][2998+1110-1] == '2025-12-17 14:26:50.996700+0100'
+    assert actual['MotorWinch_ST_ActualCurrent'][2998 + 1110 - 1] == 31
