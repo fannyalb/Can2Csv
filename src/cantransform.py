@@ -3,6 +3,9 @@ from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import logging
+
+from src.calculations import berechne_schlittenwinde_distanz
+
 log = logging.getLogger("Cantransform")
 import matplotlib.pyplot as plt
 from os import path
@@ -17,7 +20,7 @@ from pandas.core.interchange.dataframe_protocol import DataFrame
 dbc_file = "../tests/data/typ1.dbc"
 mymdf_file = "../tests/data/typ1_bsp1.mf4"
 
-def decode_file(mdf_file, dbc_file):
+def decode_file(mdf_file: str, dbc_file: str) -> MDF:
     if not path.isfile(mdf_file):
         print(f'{mdf_file} ist keine valide Datei')
     if not path.isfile(dbc_file):
@@ -91,11 +94,31 @@ def get_mdf_min_max_time(decoded_mdf: MDF) :
     max_time= to_cet(df.index[-1])
     return min_time,max_time
 
+def calculate_custom_values(decoded_mdfs):
+    ref_mdf = decoded_mdfs[0]
+    all_mdfs_df = single_dataframe(decoded_mdfs)
+
+    custom_dfs = []
+    # Schlittenwinde-Distanz
+    sig_trommel_speed = "General_LD_TrommelSpeed"
+    if sig_trommel_speed in ref_mdf.columns():
+        sw_strecke = berechne_schlittenwinde_distanz(all_mdfs_df)
+
+def single_dataframe(decoded_mdfs: list[MDF]):
+    dfs = []
+    for mdf in decoded_mdfs:
+        df = mdf.to_dataframe(time_as_date=True)
+        dfs.append(df)
+    df = pd.concat(dfs).sort_index()
+    return df
+
+
 def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list[str]):
     bsp_mdf = decoded_mdfs[0]
     channel_grp_signals = get_channel_group_signals(bsp_mdf, selected_signals)
 
     channel_grp_dfs = get_channel_grp_dfs(channel_grp_signals, decoded_mdfs)
+    calcualted_values = calculate_custom_values(decoded_mdfs)
 
     filenames = []
     for channel_grp in channel_grp_signals.keys():
@@ -141,9 +164,24 @@ def to_cet(dt : datetime) -> datetime:
         dt = dt.replace(tzinfo=ZoneInfo("UTC"))
     return dt.astimezone(ZoneInfo("Europe/Berlin"))
 
+def to_utc(dt : datetime) -> datetime:
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    return dt.astimezone(ZoneInfo("UTC"))
 
 def print_signal(signal_df):
-    signal_name = signal_df.columns[1]
+    signal_name = signal_df.columns[0]
     title = f'{signal_name} over Time'
-    signal_df.plot(x="Time", y=signal_name, kind="line", title=title)
+    signal_df.plot()
     plt.show(block=True)
+
+def print_2_signals(signal_df):
+    if not len(signal_df.columns):
+        raise Exception("Dataframe hat keine 2 Spalten")
+    signal_name1 = signal_df.columns[0]
+    signal_name2 = signal_df.columns[1]
+    title = f'{signal_name1} and {signal_name2} over Time'
+    ax = signal_df.plot(y=signal_name1, color="green")
+    signal_df.plot(y=signal_name2, ax=ax.twinx())
+    plt.show(block=True)
+

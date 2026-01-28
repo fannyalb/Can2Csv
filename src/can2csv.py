@@ -162,8 +162,8 @@ class MF4ExporterApp(tk.Tk):
 
 
     def export_csv(self):
-        selected = [self.signal_listbox.get(i) for i in self.signal_listbox.curselection()]
-        if not selected:
+        signals_selected = [self.signal_listbox.get(i) for i in self.signal_listbox.curselection()]
+        if not signals_selected:
             messagebox.showerror("Fehler", "Bitte mindestens ein Signal wählen")
             return
 
@@ -208,7 +208,7 @@ class MF4ExporterApp(tk.Tk):
         #     df.to_csv(out_path, index=False)
         out_path = os.path.join(self.out_dir, out_filename)
         decoded_files = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
-        filenames = export_to_csv(out_path, decoded_files, selected)
+        filenames = export_to_csv(out_path, decoded_files, signals_selected)
 
         messagebox.showinfo("Fertig", f'CSV Export nach {filenames[0]} abgeschlossen')
 
