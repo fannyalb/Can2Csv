@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 import logging
 
-from calculations import berechne_schlittenwinde_distanz
+from calculations import *
 
 log = logging.getLogger("Cantransform")
 import matplotlib.pyplot as plt
@@ -94,15 +94,27 @@ def get_mdf_min_max_time(decoded_mdf: MDF) :
     max_time= to_cet(df.index[-1])
     return min_time,max_time
 
-def calculate_custom_values(decoded_mdfs):
+def calculate_custom_values(decoded_mdfs) -> pd.DataFrame:
     ref_mdf = decoded_mdfs[0]
     all_mdfs_df = single_dataframe(decoded_mdfs)
 
+    df = pd.DataFrame()
     custom_dfs = []
     # Schlittenwinde-Distanz
     sig_trommel_speed = "General_LD_TrommelSpeed"
-    if sig_trommel_speed in ref_mdf.columns():
+    if sig_trommel_speed in ref_mdf.channels_db:
         sw_strecke = berechne_schlittenwinde_distanz(all_mdfs_df)
+        custom_dfs.append(sw_strecke)
+
+    # Laufwagen
+    sig_rpm_motor = "MotorLift_LD_ActualSpeed"
+    if sig_rpm_motor in ref_mdf.channels_db:
+        lw_strecken = berechne_laufwagen_distanz(all_mdfs_df)
+        custom_dfs.append(lw_strecken)
+
+    if len(custom_dfs) > 0:
+        df = pd.concat(custom_dfs, axis=0).sort_index()
+    return df
 
 def single_dataframe(decoded_mdfs: list[MDF]):
     dfs = []
@@ -118,8 +130,7 @@ def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list
     channel_grp_signals = get_channel_group_signals(bsp_mdf, selected_signals)
 
     channel_grp_dfs = get_channel_grp_dfs(channel_grp_signals, decoded_mdfs)
-    calcualted_values = calculate_custom_values(decoded_mdfs)
-
+    date_fmt = "%Y-%m-%d %H:%M:%S.%f%z"
     filenames = []
     for channel_grp in channel_grp_signals.keys():
         grp_filename = f'{filename[0:-4]}-ChGrp_{channel_grp}.csv'
@@ -127,8 +138,13 @@ def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list
                             axis=0
                             ).sort_index()
 
-        grp_mdfs_df.to_csv(grp_filename, date_format="%Y-%m-%d %H:%M:%S.%f%z")
+        grp_mdfs_df.to_csv(grp_filename, date_format=date_fmt)
         filenames.append(grp_filename)
+
+    calculated_values = calculate_custom_values(decoded_mdfs)
+    filename_calculated = f'{filename[0:-4]}-CalculatedValues.csv'
+    calculated_values.to_csv(filename_calculated, date_format=date_fmt)
+    filenames.append(filename_calculated)
 
     return filenames
 

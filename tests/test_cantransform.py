@@ -14,6 +14,7 @@ TEST_DECODED_MDF_FILE = "data/typ1_bsp1_decoded.mf4"
 TEST_DECODED_MDF_FILE2 = "data/typ1_bsp2_decoded.mf4"
 TEST_SIGNAL_TROMMEL_POS = "General_LD_TrommelPositoin"
 TEST_BSP1_CSV_BATTERY_INFO = "data/beispiel1_batteryInfo.csv"
+TEST_DECODED_MDF_FILE_LW = "data/typ2_bsp1_decoded.mf4"
 
 
 def test_decode_file_returns_mdf_object():
@@ -99,14 +100,16 @@ def test_export_to_csv_one_file():
     signals =  ["Bat_ST_AvgVoltage", "Bat_ST_HighestCellTemp", "Bat_ST_LowestCellTemp", "Bat_ST_TotalCurrent"]
     result = export_to_csv("testoutput.csv", [decoded_mdf], signals)
 
-    # expected = pd.read_csv(TEST_BSP1_CSV_BATTERY_INFO)
+    assert len(result) == 2
     actual = pd.read_csv(result[0])
+    actual_customs = pd.read_csv(result[1])
 
-    print(f'Actual: {actual}')
     assert actual['Bat_ST_AvgVoltage'] is not None
     assert actual['timestamps'][2] == "2025-12-17 10:05:00.225400+0100"
     assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
     assert actual['Bat_ST_TotalCurrent'][18] == -0.5
+
+    assert actual_customs['sw_strecke_cumsum_m'][8995] == 17.6292
 
 
 def test_export_to_csv_2_files():
@@ -119,16 +122,16 @@ def test_export_to_csv_2_files():
     signals = ["Bat_ST_AvgVoltage", "Bat_ST_HighestCellTemp", "Bat_ST_LowestCellTemp", "Bat_ST_TotalCurrent"]
     results = export_to_csv("testoutput2.csv", decoded_mdfs, signals)
 
-    assert len(results) == 1
+    assert len(results) == 2
     assert results[0] is not None
-    for csv_file in results:
-        actual = pd.read_csv(csv_file)
 
-        print(f'Actual: {actual}')
-        assert actual['Bat_ST_AvgVoltage'] is not None
-        assert actual['timestamps'][2] == "2025-12-17 10:05:00.225400+0100"
-        assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
-        assert actual['Bat_ST_TotalCurrent'][18] == -0.5
+    actual = pd.read_csv(results[0])
+
+    print(f'Actual: {actual}')
+    assert actual['Bat_ST_AvgVoltage'] is not None
+    assert actual['timestamps'][2] == "2025-12-17 10:05:00.225400+0100"
+    assert actual['Bat_ST_AvgVoltage'][19] == 104.300000000000
+    assert actual['Bat_ST_TotalCurrent'][18] == -0.5
 
 def test_export_to_csv_2_channelgrps():
     # Separate Datei pro Channel-Group
@@ -141,7 +144,7 @@ def test_export_to_csv_2_channelgrps():
     signals = ["Bat_ST_AvgVoltage", "MotorWinch_ST_ActualCurrent"]
     results = export_to_csv(csv_filename, decoded_mdfs, signals)
 
-    assert len(results) == 2
+    assert len(results) == 3
     assert results[0] is not None
     csv_file = results[1]
     actual = pd.read_csv(csv_file)
@@ -149,3 +152,29 @@ def test_export_to_csv_2_channelgrps():
     print(f'Actual: {actual}')
     assert actual['timestamps'][2998+1110-1] == '2025-12-17 14:26:50.996700+0100'
     assert actual['MotorWinch_ST_ActualCurrent'][2998 + 1110 - 1] == 31
+
+
+def test_export_to_csv_lw():
+    # Separate Datei pro Channel-Group
+    csv_filename = "testoutput4.csv"
+    if path.isfile(csv_filename):
+        os.remove(csv_filename)
+    decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
+    decoded_mdfs = [decoded_mdf]
+    signals = ["Bat_LD_Voltage", "MotorLift_LD_ActualCurrent"]
+    results = export_to_csv(csv_filename, decoded_mdfs, signals)
+
+    assert len(results) == 3
+    assert results[0] is not None
+    csv_file = results[1]
+    actual = pd.read_csv(csv_file)
+    actual_custom = pd.read_csv(results[2])
+
+    print(f'Actual: {actual}')
+    assert actual['MotorLift_LD_ActualCurrent'] is not None
+    assert actual_custom['lw_strecke_delta_m'] is not None
+    assert actual_custom['lw_strecke_pull_delta_m'] is not None
+    assert actual_custom['lw_strecke_release_delta_m'] is not None
+    assert actual_custom['lw_strecke_pull_cumsum_m'] is not None
+    assert actual_custom['lw_strecke_pull_cumsum_m'] is not None
+    assert actual_custom['lw_strecke_cumsum_m'] is not None

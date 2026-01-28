@@ -24,8 +24,9 @@ def berechne_schlittenwinde_distanz(df: pd.DataFrame,
     dt = df.index.to_series().diff().dt.total_seconds()
     dt.iloc[0] = 0.0
 
-    result["sw_strecke_delta_m"] = (v_lin * dt)
-    result["sw_strecke_cumsum_m"] = (v_lin * dt).cumsum()
+    streckendeltas = round((v_lin * dt),4)
+    result["sw_strecke_delta_m"] = streckendeltas
+    result["sw_strecke_cumsum_m"] = round(streckendeltas.cumsum(),4)
     return result
 
 def berechne_laufwagen_distanz(df: pd.DataFrame,
@@ -48,7 +49,7 @@ def berechne_laufwagen_distanz(df: pd.DataFrame,
     ds_release = delta_strecke_lastseil.clip(lower=0)       # if i < 0 : i = 0
     ds_pull = abs(delta_strecke_lastseil.clip(upper=0))   # if i > 0 : i = 0
 
-    result_df["lw_strecke_delta"] = delta_strecke_lastseil
+    result_df["lw_strecke_delta_m"] = delta_strecke_lastseil
     # Streckenaenderung Zuzug
     result_df["lw_strecke_pull_delta_m"] = ds_pull
     # Streckenaenderung Auslass
