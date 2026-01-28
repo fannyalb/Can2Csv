@@ -1,5 +1,5 @@
 [project]
-name = "ForestCan2Csv"
+name = "can2csv"
 version = "0.1.0"
 description = "Konvertiert Can-Daten von Bauer-Ladstaetter Projekt in CSV"
 requires-python = ">=3.10"
