@@ -24,7 +24,7 @@ def berechne_schlittenwinde_distanz(df: pd.DataFrame,
     dt = df.index.to_series().diff().dt.total_seconds()
     dt.iloc[0] = 0.0
 
-    result["sw_strecke_current_m"] = (v_lin * dt)
+    result["sw_strecke_delta_m"] = (v_lin * dt)
     result["sw_strecke_cumsum_m"] = (v_lin * dt).cumsum()
     return result
 
@@ -33,7 +33,7 @@ def berechne_laufwagen_distanz(df: pd.DataFrame,
                                aus_liftpos=False) -> pd.DataFrame:
     # Wenn aus_liftpos == true -> Berechnung aus Liftpos
     # Sonst Berechnung aus Motorgeschwindigkeit ("MotorLift")
-    result_df = df
+    result_df = pd.DataFrame(index=df.index)
     delta_strecke_lastseil: pd.DataFrame
     if aus_liftpos:
         delta_strecke_lastseil = (
@@ -48,17 +48,17 @@ def berechne_laufwagen_distanz(df: pd.DataFrame,
     ds_release = delta_strecke_lastseil.clip(lower=0)       # if i < 0 : i = 0
     ds_pull = abs(delta_strecke_lastseil.clip(upper=0))   # if i > 0 : i = 0
 
-    result_df["lw_ds_m"] = delta_strecke_lastseil
+    result_df["lw_strecke_delta"] = delta_strecke_lastseil
     # Streckenaenderung Zuzug
-    result_df["lw_ds_pull_m"] = ds_pull
+    result_df["lw_strecke_pull_delta_m"] = ds_pull
     # Streckenaenderung Auslass
-    result_df["lw_ds_release"] = ds_release
+    result_df["lw_strecke_release_delta_m"] = ds_release
     # Zuzug kumulierte Summe
-    result_df["lw_strecke_pull"] = ds_pull.cumsum()
+    result_df["lw_strecke_pull_cumsum_m"] = ds_pull.cumsum()
     # Ablass kumulierte Summe
-    result_df["lw_strecke_release"] = abs(ds_release).cumsum() # if i > 0 : i = 0
+    result_df["lw_strecke_release_cumsum_m"] = abs(ds_release).cumsum() # if i > 0 : i = 0
     # Gesamtdistanz kumulierte Summe
-    result_df["lw_strecke_gesamt_m"] = abs(delta_strecke_lastseil).cumsum()
+    result_df["lw_strecke_cumsum_m"] = abs(delta_strecke_lastseil).cumsum()
     return result_df
 
 

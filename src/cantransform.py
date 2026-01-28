@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 import logging
 
-from src.calculations import berechne_schlittenwinde_distanz
+from calculations import berechne_schlittenwinde_distanz
 
 log = logging.getLogger("Cantransform")
 import matplotlib.pyplot as plt
