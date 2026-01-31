@@ -5,11 +5,13 @@ from zoneinfo import ZoneInfo
 import logging
 
 from calculations import *
+from src.calculations import berechne_schlittenwinde_distanz
 
 log = logging.getLogger("Cantransform")
 import matplotlib.pyplot as plt
 from os import path
 from datetime import datetime, time
+from calculations import *
 
 import pandas as pd
 
@@ -108,20 +110,36 @@ def calculate_custom_values(decoded_mdfs) -> pd.DataFrame:
 
     # Laufwagen
     sig_rpm_motor = "MotorLift_LD_ActualSpeed"
+    sig_weight = "General_LD_MeassuredWeight"
+    sig_state_of_charge = "General_LD_StateOfCharge"
     if sig_rpm_motor in ref_mdf.channels_db:
-        lw_strecken = berechne_laufwagen_distanz(all_mdfs_df)
+        lw_strecken = berechne_laufwagen_distanz_seil(all_mdfs_df)
         custom_dfs.append(lw_strecken)
 
+        if sig_weight in ref_mdf.channels_db:
+            lw_gewicht_total = berechne_gewicht(all_mdfs_df)
+            lw_gewicht_in_bewegung = berechne_gewicht_in_bewegung(all_mdfs_df)
+            custom_dfs.append(lw_gewicht_total)
+            custom_dfs.append(lw_gewicht_in_bewegung)
+        if sig_state_of_charge in ref_mdf.channels_db:
+            lw_state_of_charge = all_mdfs_df[sig_state_of_charge]
+            lw_state_of_charge = lw_state_of_charge.rename(columns={sig_state_of_charge:"lw_state_of_charge"})
+            custom_dfs.append(lw_state_of_charge)
+
     if len(custom_dfs) > 0:
-        df = pd.concat(custom_dfs, axis=0).sort_index()
+        df = combine_dfs(custom_dfs)
     return df
 
 def single_dataframe(decoded_mdfs: list[MDF]):
-    dfs = []
-    for mdf in decoded_mdfs:
-        df = mdf.to_dataframe(time_as_date=True)
-        dfs.append(df)
-    df = pd.concat(dfs).sort_index()
+    dfs = [f.to_dataframe(time_as_date=True, raster=0.1) for f in decoded_mdfs]
+    df = combine_dfs(dfs)
+    return df
+
+def combine_dfs(dfs: list[pd.DataFrame]) -> pd.DataFrame:
+    df = pd.concat(dfs)
+    df = df.sort_index()
+    df = df[~df.index.duplicated(keep='first')]
+    df = df.ffill()
     return df
 
 
@@ -189,6 +207,18 @@ def print_signal(signal_df):
     signal_name = signal_df.columns[0]
     title = f'{signal_name} over Time'
     signal_df.plot()
+    plt.show(block=True)
+
+def print_custom_data(df):
+    if not len(df.columns):
+        raise Exception("Dataframe hat keine 2 Spalten")
+    gewicht = df["lw_weight_mov_cumsum_kg"][-1]
+    strecke = df["lw_strecke_cumsum_m"]
+    akkuverbrauch = df["lw_state_of_charge"]
+
+    title = f'Custom Data'
+    ax = df.plot(y=akkuverbrauch, color="green", title=title)
+    df.plot(y=strecke, ax=ax.twinx())
     plt.show(block=True)
 
 def print_2_signals(signal_df):

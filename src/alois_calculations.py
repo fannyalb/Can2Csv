@@ -1,10 +1,13 @@
 import logging
+import math
+
 import pandas as pd
 from typing import List, Dict
 
 from asammdf import MDF
 
-logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger("Alois")
+log.setLevel(logging.DEBUG)
 
 def mdf_to_list_dict(mdf: MDF, signals: list[str]) -> Dict[str, list[Dict]]:
     return mdfs_to_list_dict([mdf], signals)
@@ -14,10 +17,13 @@ def mdfs_to_list_dict(mdfs: list[MDF], signals: list[str]) -> Dict[str, list[Dic
     for sig in signals:
         sig_mdfs = []
         for mdf in mdfs:
+            if not sig in mdf.channels_db:
+                continue
             mdf_df = mdf.to_dataframe(channels=[sig]).reset_index()
             mdf_df = mdf_df.rename(columns={sig: "value"})
             sig_mdfs.append(mdf_df)
-        machine_data[sig] = pd.concat(sig_mdfs, axis=0).sort_index().to_dict('records')
+        if len(sig_mdfs) > 0 :
+            machine_data[sig] = pd.concat(sig_mdfs, axis=0).sort_index().to_dict('records')
     return machine_data
 
 def extract_weight_events(
@@ -30,7 +36,7 @@ def extract_weight_events(
         min_weight: float = 20,
         post_window_s: float = 5.0
 ) -> Dict:
-    logging.info(f"[WEIGHT_EVENTS] Eingehende Punkte: weight={len(weight_data)}, speed={len(speed_data)}")
+    log.info(f"[WEIGHT_EVENTS] Eingehende Punkte: weight={len(weight_data)}, speed={len(speed_data)}")
 
     if not weight_data or not speed_data:
         raise Exception("Daten fehlen")
@@ -51,12 +57,10 @@ def extract_weight_events(
     running = False
     run_start = None
     run_last_ts = None
-    print(f"{len(speed_sorted)} speed-date")
 
     for s in speed_sorted:
         ts = s["timestamps"]
         val = s["value"]
-        # print(f"Speed {s}")
         moving = abs(val) > speed_threshold
 
         if moving:
@@ -71,8 +75,7 @@ def extract_weight_events(
                 duration = run_last_ts - run_start if run_last_ts is not None else 0
                 if duration >= movement_window_s:
                     movements.append({"start": run_start, "end": run_last_ts})
-                    logging.info(f"[RUN FOUND] start={run_start}, end={run_last_ts}, duration={duration}s")
-                    print(f"[RUN FOUND] start={run_start}, end={run_last_ts}, duration={duration}s")
+                    log.info(f"[RUN FOUND] start={run_start}, end={run_last_ts}, duration={duration}s")
                 running = False
                 run_start = None
                 run_last_ts = None
@@ -82,7 +85,7 @@ def extract_weight_events(
         duration = run_last_ts - run_start
         if duration >= movement_window_s:
             movements.append({"start": run_start, "end": run_last_ts})
-            logging.info(f"[RUN FOUND] start={run_start}, end={run_last_ts}, duration={duration}s")
+            log.info(f"[RUN FOUND] start={run_start}, end={run_last_ts}, duration={duration}s")
 
     # 2) Events bestimmen
     events = []
@@ -114,7 +117,7 @@ def extract_weight_events(
                 break
             if w["value"] is not None and w["value"] >= min_weight:
                 candidate = {"timestamps": w["timestamps"], "weight": w["value"]}
-                logging.info(f"[EVENT BEFORE RUN] gefunden: {candidate}")
+                log.info(f"[EVENT BEFORE RUN] gefunden: {candidate}")
                 break
             idx -= 1
 
@@ -123,7 +126,7 @@ def extract_weight_events(
             for w in weight_sorted:
                 if mv_start <= w["timestamps"] <= mv_end and w["value"] >= min_weight:
                     candidate = {"timestamps": w["timestamps"], "weight": w["value"]}
-                    logging.info(f"[EVENT DURING RUN] gefunden: {candidate}")
+                    log.info(f"[EVENT DURING RUN] gefunden: {candidate}")
                     break
 
         # c) Falls immer noch keins, Gewicht kurz nach Run-Ende prüfen
@@ -131,22 +134,19 @@ def extract_weight_events(
             for w in weight_sorted:
                 if mv_end < w["timestamps"] <= mv_end + post_window_s and w["value"] >= min_weight:
                     candidate = {"timestamps": w["timestamps"], "weight": w["value"]}
-                    logging.info(f"[EVENT AFTER RUN] gefunden: {candidate}")
+                    log.info(f"[EVENT AFTER RUN] gefunden: {candidate}")
                     break
 
         if candidate:
             if last_weight_below_threshold:
-                print("Gefunden")
                 events.append(candidate)
                 last_event_time = candidate["timestamps"]
                 last_weight_below_threshold = False  # Reset-Flag zurücksetzen
             else:
-                logging.info(
-                    f"[EVENT IGNORED] Gewicht noch über min_weight seit letztem Event für Run {mv_start}-{mv_end}")
-                print(
+                log.info(
                     f"[EVENT IGNORED] Gewicht noch über min_weight seit letztem Event für Run {mv_start}-{mv_end}")
         else:
-            print(f"[EVENT] Kein passendes Gewicht für Run {mv_start}-{mv_end}")
+            log.info(f"[EVENT] Kein passendes Gewicht für Run {mv_start}-{mv_end}")
 
     # 3) Ergebnis zusammenstellen
     events = sorted(events, key=lambda x: x["timestamps"])
@@ -158,7 +158,7 @@ def extract_weight_events(
         "all_events": events  # alle für Graph
     }
 
-    logging.info(f"[WEIGHT_EVENTS] Ergebnis: {summary}")
+    log.info(f"[WEIGHT_EVENTS] Ergebnis: {summary}")
     return summary
 
 
@@ -182,11 +182,9 @@ def calculate_distance(
             - total_distance: Summe der Strecke in Metern
             - increments: Liste der Strecken pro Intervall (Meter)
     """
-    import logging
-    import math
 
     if not rpm_data:
-        logging.info("[DISTANCE] Keine RPM-Daten vorhanden")
+        log.info("[DISTANCE] Keine RPM-Daten vorhanden")
         return {"total_distance": 0.0, "increments": []}
 
     # 1) sortieren nach Timestamp
@@ -218,7 +216,7 @@ def calculate_distance(
         increments.append(delta_s)
         total_distance += delta_s
 
-    logging.info(f"[DISTANCE] total_distance={total_distance:.2f} m, intervals={len(increments)}")
+    log.info(f"[DISTANCE] total_distance={total_distance:.2f} m, intervals={len(increments)}")
     return {"total_distance": total_distance, "increments": increments}
 
 
@@ -230,9 +228,6 @@ def calculate_lift_distance(
         drum_diameter_m: float = 0.28,
         i: float = 60.0
 ) -> Dict:
-    import math
-    import logging
-
     if not speed_data:
         return {"total_pull": 0.0, "total_release": 0.0, "increments_pull": [], "increments_release": []}
 
@@ -279,7 +274,7 @@ def calculate_lift_distance(
             total_release += abs(delta_s)
             increments_release.append(abs(delta_s))
 
-    logging.info(
+    log.info(
         f"[LIFT_DISTANCE] Pull={total_pull:.2f} m, Release={total_release:.2f} m, Intervals={len(increments_pull) + len(increments_release)}")
     return {
         "total_pull": total_pull,

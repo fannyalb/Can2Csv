@@ -55,6 +55,7 @@ class MF4ExporterApp(tk.Tk):
         self.dbc_entry.grid(row=0, column=1, sticky="w")
         if self.last_paths and self.last_paths[ChoiceType.LAST_DBC.value]:
             self.dbc_entry.insert(0, self.last_paths[ChoiceType.LAST_DBC.value])
+            self.dbc_file = self.last_paths[ChoiceType.LAST_DBC.value]
         ttk.Button(frm, text="Auswählen", command=self.select_dbc).grid(row=0, column=2)
 
         # MF4 single
@@ -68,6 +69,9 @@ class MF4ExporterApp(tk.Tk):
         self.mf4_folder_entry = ttk.Entry(frm, width=75)
         self.mf4_folder_entry.grid(row=2, column=1, sticky="w")
         ttk.Button(frm, text="Ordner wählen", command=self.select_mf4_folder).grid(row=2, column=2)
+
+        # Show Graphic
+        ttk.Button(frm, text="Daten anzeigen", command=self.show_plot_custom_data).grid(row=5, column=0, pady=5)
 
         # Load signals
         # ttk.Button(frm, text="Signale laden", command=self.load_signals).grid(row=5, column=0, pady=5)
@@ -140,6 +144,10 @@ class MF4ExporterApp(tk.Tk):
             title="MDF-Verzeichnis wählen",
             initialdir=initpath
         )
+        self.update_mf4_folder_entry(path)
+        messagebox.showinfo("MF4-Dateien", f"{len(self.mf4_paths)} MF4-Dateien gefunden (rekursiv).")
+
+    def update_mf4_folder_entry(self, path):
         if path:
             self.mf4_folder_entry.delete(0, tk.END)
             self.mf4_folder_entry.insert(0, path)
@@ -150,7 +158,6 @@ class MF4ExporterApp(tk.Tk):
                 for f in files
                 if f.lower().endswith(".mf4")
             ]
-            messagebox.showinfo("MF4-Dateien", f"{len(self.mf4_paths)} MF4-Dateien gefunden (rekursiv).")
             self.save_last_choice(ChoiceType.LAST_MDF_DIR, path)
 
     def select_csv_folder(self):
@@ -209,6 +216,9 @@ class MF4ExporterApp(tk.Tk):
 
 
     def export_csv(self):
+        if not self.mf4_paths:
+            messagebox.showerror("Fehler", "Keine MF4-Dateien gefunden")
+            return
         decoded_mdf = decode_file(self.mf4_paths[0], self.dbc_file)
         self.available_signals = get_available_signals(decoded_mdf)
         signals_selected = self.available_signals
@@ -266,6 +276,24 @@ class MF4ExporterApp(tk.Tk):
         messagebox.showinfo("Fertig", msg)
 
 
+    def show_plot_custom_data(self):
+        if not self.mf4_paths:
+            messagebox.showerror("Fehler", "Keine MF4-Dateien gefunden")
+            return
+        decoded_mdf = decode_file(self.mf4_paths[0], self.dbc_file)
+        self.available_signals = get_available_signals(decoded_mdf)
+        signals_selected = self.available_signals
+
+        if not signals_selected:
+            messagebox.showerror("Fehler", "Keine passenden Signale in mf4 gefunden")
+            return
+
+        decoded_files = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
+        custom_data = calculate_custom_values(decoded_files)
+
+        if custom_data["lw_state_of_charge"]:
+            print_custom_data(custom_data)
+
 
 
     def save_last_choice(self, choice_type: ChoiceType, choice_path: str):
@@ -283,6 +311,11 @@ class MF4ExporterApp(tk.Tk):
         if CONFIG_FILE.exists():
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 self.last_paths = json.load(f)
+            if self.last_paths:
+                if self.last_paths[ChoiceType.LAST_DBC.value]:
+                    self.dbc_file = ChoiceType.LAST_DBC.value
+                if self.last_paths[ChoiceType.LAST_MDF_DIR.value]:
+                    self.mf4_folder_entry = ChoiceType.LAST_MDF_DIR.value
 
 
 if __name__ == "__main__":

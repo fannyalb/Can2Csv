@@ -38,8 +38,9 @@ def test_print_all():
     speed_signal = "MotorDrive_LD_ActualSpeed"
     signals = [weight_signal, speed_signal]
 
-    decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
+    decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW_2)
     mdf_df = decoded_mdf.to_dataframe(channels=[weight_signal, speed_signal], time_as_date=True)
+    mdf_df[speed_signal] = mdf_df[speed_signal] / 10
     src.cantransform.print_signal(mdf_df)
 
 

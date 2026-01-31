@@ -3,7 +3,6 @@ from src.cantransform import *
 import pandas as pd
 import numpy as np
 
-logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger("Calcs")
 log.setLevel(logging.DEBUG)
 
@@ -29,9 +28,33 @@ def berechne_schlittenwinde_distanz(df: pd.DataFrame,
     result["sw_strecke_cumsum_m"] = round(streckendeltas.cumsum(),4)
     return result
 
-def berechne_laufwagen_distanz(df: pd.DataFrame,
-                               trommel_durchmesser_m=0.28,
-                               aus_liftpos=False) -> pd.DataFrame:
+def berechne_laufwagen_distanz(df:pd.DataFrame) -> pd.DataFrame():
+    speed_signal = "General_LD_CarryRopeDriveSpeed"
+    speed_signal_motor = "MotorDrive_LD_ActualSpeed"
+    if speed_signal not in df.columns:
+        raise Exception(f"Channel {speed_signal} nicht in dataframe")
+    # Zurueckgelegte Strecke
+    # s1 = s0 + v1 * dt1
+    result = pd.DataFrame(index=df.index)
+    dt = df.index.to_series().diff().dt.total_seconds()
+    dt.iloc[0] = 0.0
+    v_lin = df[speed_signal] * np.sign(df[speed_signal_motor])
+
+    streckendeltas = v_lin * dt
+    ds_up = streckendeltas.clip(lower=0)       # if i < 0 : i = 0
+    ds_down = abs(streckendeltas.clip(upper=0))   # if i > 0 : i = 0
+    result["lw_strecke_delta_m"] = round(streckendeltas, 0)
+    result["lw_strecke_up_delta_m"] = round(ds_up, 0)
+    result["lw_strecke_down_delta_m"] = round(ds_down, 0)
+    result["lw_strecke_up_cumsum_m"] = round(ds_up.cumsum(), 0)
+    result["lw_strecke_down_cumsum_m"] = round(ds_down.cumsum(), 0)
+    result["lw_strecke_cumsum_m"] = round(abs(streckendeltas).cumsum(), 0)
+    return result
+
+
+def berechne_laufwagen_distanz_seil(df: pd.DataFrame,
+                                    trommel_durchmesser_m=0.28,
+                                    aus_liftpos=False) -> pd.DataFrame:
     # Wenn aus_liftpos == true -> Berechnung aus Liftpos
     # Sonst Berechnung aus Motorgeschwindigkeit ("MotorLift")
     result_df = pd.DataFrame(index=df.index)
@@ -42,24 +65,25 @@ def berechne_laufwagen_distanz(df: pd.DataFrame,
     else:
         getriebeuebersetzung=60
         delta_strecke_lastseil = (
-            streckendelta_lastseil_aus_motorspeed(df,
-                                                  trommel_durchmesser_m,
-                                                  getriebeuebersetzung))
+            streckendelta_lastseil_aus_motorspeed(
+                df,
+                trommel_durchmesser_m,
+                getriebeuebersetzung))
 
     ds_release = delta_strecke_lastseil.clip(lower=0)       # if i < 0 : i = 0
     ds_pull = abs(delta_strecke_lastseil.clip(upper=0))   # if i > 0 : i = 0
 
-    result_df["lw_strecke_delta_m"] = delta_strecke_lastseil
+    result_df["lw_rope_delta_m"] = delta_strecke_lastseil
     # Streckenaenderung Zuzug
-    result_df["lw_strecke_pull_delta_m"] = ds_pull
+    result_df["lw_rope_pull_delta_m"] = ds_pull
     # Streckenaenderung Auslass
-    result_df["lw_strecke_release_delta_m"] = ds_release
+    result_df["lw_rope_release_delta_m"] = ds_release
     # Zuzug kumulierte Summe
-    result_df["lw_strecke_pull_cumsum_m"] = ds_pull.cumsum()
+    result_df["lw_rope_pull_cumsum_m"] = ds_pull.cumsum()
     # Ablass kumulierte Summe
-    result_df["lw_strecke_release_cumsum_m"] = abs(ds_release).cumsum() # if i > 0 : i = 0
+    result_df["lw_rope_release_cumsum_m"] = abs(ds_release).cumsum() # if i > 0 : i = 0
     # Gesamtdistanz kumulierte Summe
-    result_df["lw_strecke_cumsum_m"] = abs(delta_strecke_lastseil).cumsum()
+    result_df["lw_rope_cumsum_m"] = abs(delta_strecke_lastseil).cumsum()
     return result_df
 
 
@@ -82,7 +106,7 @@ def streckendelta_lastseil_aus_liftpos(df: pd.DataFrame,
 def streckendelta_lastseil_aus_motorspeed(df: pd.DataFrame,
                                           trommel_durchmesser_m: float,
                                           getriebeuebersetzung=60
-                                          ):
+                                          ) -> pd.DataFrame:
     sig_rpm_motor = "MotorLift_LD_ActualSpeed"
     if sig_rpm_motor not in df.columns:
         raise Exception(f"Channel {sig_rpm_motor} nicht in dataframe")
@@ -107,6 +131,8 @@ def berechne_gewicht(df: pd.DataFrame):
     if sig_weight not in df.columns:
         raise Exception(f"Channel {sig_weight} nicht in dataframe")
 
+    result = pd.DataFrame(index=df.index)
+
     # Zeitraeume, wo eine Gewichtsmessung stattfindet
     # -> Erkennung: Gewichtsaenderung
     ist_neuer_block =df[sig_weight] != df[sig_weight].shift()
@@ -120,8 +146,8 @@ def berechne_gewicht(df: pd.DataFrame):
     )
 
     gewichte_aufsummiert = (gewicht_pro_block * ist_neuer_block).cumsum()
-    df["lw_weight_kg"] = gewichte_aufsummiert
-    return df
+    result["lw_weight_kg"] = gewichte_aufsummiert
+    return result
 
 def berechne_gewicht_in_bewegung(dframe: pd.DataFrame,
                                  zeitfenster_min_s=15,
@@ -136,6 +162,7 @@ def berechne_gewicht_in_bewegung(dframe: pd.DataFrame,
 
     min_duration = zeitfenster_min_s
     df = dframe.copy()
+    result = pd.DataFrame(index=dframe.index)
 
     # Bewegung erkennen
     is_moving = abs(df[sig_speed]) > speed_abs_min_rpm
@@ -154,36 +181,65 @@ def berechne_gewicht_in_bewegung(dframe: pd.DataFrame,
         )
     )
 
-    movement_blocks["duration"] = (
-            movement_blocks["end_time"] - movement_blocks["start_time"]
-    ).dt.total_seconds()
+    if movement_blocks.empty:
+        movement_blocks["duration"] = pd.Series(dtype='float')
+    else:
+        movement_blocks["duration"] = (
+                movement_blocks["end_time"] - movement_blocks["start_time"]
+        ).dt.total_seconds()
 
-    # Gültige Bewegungen
-    valid_blocks = movement_blocks[
-        movement_blocks["duration"] >= min_duration
-        ].index
+    # nur bewegungen mit mindestdauer
+    movement_blocks = movement_blocks[movement_blocks["duration"] >= min_duration]
 
-    # Bewegungsstart (nur gültige)
-    movement_start = (
-            is_moving &
-            (~is_moving.shift(fill_value=False)) &
-            (df["_block_id"].isin(valid_blocks))
+    # Bewegungsstart (nur gueltige bloecke)
+    movement_start  = (
+        is_moving &
+        (~is_moving.shift(fill_value=False)) &
+        (df["_block_id"].isin(movement_blocks.index.to_list()))
     )
 
-    # Gewicht zum Bewegungsstart zählen
-    df["lw_weight_mov_current"] = df[sig_weight].where(
+    # Gewicht zum Bewegungsstart (Kandidat)
+    df["_weight_start_raw"] = df[sig_weight].where(
         movement_start & (df[sig_weight] > min_weight),
         0.0
     )
 
-    #  Kumulierte Summe
-    df["lw_weight_mov_cumsum"] = df["lw_weight_mov_current"].cumsum()
+    # Gültige Bewegungen
+    valid_blocks = []
+    last_end_time = None
+
+    for block_id, row in movement_blocks.iterrows():
+        start = row["start_time"]
+        end = row["end_time"]
+
+        weight_at_start = df.loc[start, "_weight_start_raw"]
+        if weight_at_start == 0:
+            continue
+
+        if last_end_time is None:
+            # Erste gueltige Bewegung
+            valid_blocks.append(block_id)
+            last_end_time = end
+            continue
+
+        # Gewicht zw letzter gezaehlter bewegung und dieser pruefen
+        weight_between = df.loc[last_end_time:start, sig_weight]
+
+        if (weight_between < min_weight).any():
+            valid_blocks.append((block_id))
+            last_end_time = end
+
+
+    # Gewicht zum Bewegungsstart zählen
+    result["lw_weight_mov_current_kg"] = 0.0
+    for block_id in valid_blocks:
+        start_time = movement_blocks.loc[block_id, "start_time"]
+        result.loc[start_time, "lw_weight_mov_current_kg"] = (
+            df.loc)[start_time, sig_weight]
+
+    result["lw_weight_mov_cumsum_kg"] = result["lw_weight_mov_current_kg"].cumsum()
 
     # Aufräumen
-    df.drop(columns="_block_id", inplace=True)
+    df.drop(columns=["_block_id","_weight_start_raw"], inplace=True)
 
-    return df
-
-    df["lw_weight_mov_current_kg"] = weight_current
-    df["lw_weight_mov_sum_kg"] = pd.Series(gewichte_summiert, index=df.index).cumsum()
-    return df
+    return result
