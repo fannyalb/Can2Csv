@@ -3,7 +3,7 @@ from src.cantransform import *
 import pandas as pd
 import numpy as np
 
-from src.machine_data import Laufwagen, Schlittenwinde
+from src.machine_data import Laufwagen, Schlittenwagen
 
 log = logging.getLogger("Calcs")
 log.setLevel(logging.DEBUG)
@@ -26,8 +26,8 @@ def berechne_schlittenwinde_distanz(df: pd.DataFrame,
     dt.iloc[0] = 0.0
 
     streckendeltas = round((v_lin * dt),4)
-    result[Schlittenwinde.DISTANCE_DELTA.value] = streckendeltas
-    result[Schlittenwinde.DISTANCE_CUMSUM.value] = round(streckendeltas.cumsum(),4)
+    result[Schlittenwagen.DISTANCE_DELTA.value] = streckendeltas
+    result[Schlittenwagen.DISTANCE_CUMSUM.value] = round(streckendeltas.cumsum(),4)
     return result
 
 def berechne_laufwagen_distanz(df:pd.DataFrame) -> pd.DataFrame():

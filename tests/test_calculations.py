@@ -22,7 +22,7 @@ TEST_DECODED_MDF_FILE_LW_4 = "data/typ2_bsp4_decoded.mf4"
 TEST_DECODED_MDF_FILE_SW = "data/typ1_bsp2_decoded.mf4"
 
 
-def test_berechne_distanz_schlittenwinde():
+def test_berechne_distanz_schlittenwagen():
     speed_signal = "General_LD_TrommelSpeed"
     signals = [speed_signal]
 

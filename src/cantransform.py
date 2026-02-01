@@ -102,24 +102,19 @@ def calculate_custom_values(decoded_mdfs) -> pd.DataFrame:
 
     df = pd.DataFrame()
     custom_dfs = []
-    # Schlittenwinde-Distanz
+    # Schlittenwagen-Distanz
     sig_trommel_speed = "General_LD_TrommelSpeed"
     if sig_trommel_speed in ref_mdf.channels_db:
-        log.info("Schlittenwinde")
         sw_strecke = berechne_schlittenwinde_distanz(all_mdfs_df)
         custom_dfs.append(sw_strecke)
 
     # Laufwagen
     sig_rpm_lift_motor = Laufwagen.SIG_RPM_LIFT_MOTOR.value
-    sig_rpm_drive_motor = Laufwagen.SIG_RPM_DRIVE_MOTOR.value
     sig_weight = Laufwagen.SIG_MEASURED_WEIGHT.value
     sig_state_of_charge = Laufwagen.SIG_STATE_OF_CHARGE.value
     channels = ref_mdf.channels_db.keys()
-    print(f"Channles {channels}")
 
     if sig_rpm_lift_motor in channels:
-        log.info("Laufwagen")
-        print("ja")
         lw_seil_strecken = berechne_laufwagen_distanz_seil(all_mdfs_df)
         custom_dfs.append(lw_seil_strecken)
 
@@ -132,11 +127,6 @@ def calculate_custom_values(decoded_mdfs) -> pd.DataFrame:
         if sig_state_of_charge in channels:
             lw_state_of_charge = all_mdfs_df[sig_state_of_charge]
             custom_dfs.append(lw_state_of_charge)
-
-    if sig_rpm_drive_motor in channels:
-        print("DriveMotor")
-        lw_strecken = berechne_laufwagen_distanz(all_mdfs_df)
-        custom_dfs.append(lw_strecken)
 
     if len(custom_dfs) > 0:
         df = combine_dfs(custom_dfs)

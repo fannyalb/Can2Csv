@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Schlittenwinde(Enum):
+class Schlittenwagen(Enum):
     DISTANCE_DELTA = "sw_strecke_delta_m"
     DISTANCE_CUMSUM = "sw_strecke_cumsum_m"
 
@@ -21,16 +21,17 @@ class Laufwagen(Enum):
     ROPE_RELEASE_CUMSUM = "lw_rope_release_cumsum_m"
     # Gesamtdistanz kumulierte Summe
     ROPE_DISTANCE_CUMSUM = "lw_rope_cumsum_m"
-    # Zurueckgelegte Strecke am Tragseil (Deltas)
+    # Zurueckgelegte Strecke CarryRope (Deltas)
     DISTANCE_DELTA = "lw_strecke_delta_m"
-    # Zurueckgelegte Strecke am Tragseil (Deltas aufsummiert)
+    # Zurueckgelegte Strecke CarryRope (Deltas aufsummiert)
     DISTANCE_CUMSUM = "lw_strecke_cumsum_m"
-    # Zurueckgelegte Strecke am Tragseil nach oben (Deltas)
+    # Zurueckgelegte Strecke CarryRope nach oben (Deltas)
     DISTANCE_UP_DELTA = "lw_strecke_up_delta_m"
     DISTANCE_UP_CUMSUM = "lw_strecke_up_cumsum_m"
-    # Zurueckgelegte Strecke am Tragseil nach unten (Deltas)
+    # Zurueckgelegte Strecke CarryRope nach unten (Deltas)
     DISTANCE_DOWN_DELTA = "lw_strecke_down_delta_m"
     DISTANCE_DOWN_CUMSUM = "lw_strecke_down_cumsum_m"
+
     SIG_RPM_LIFT_MOTOR = "MotorLift_LD_ActualSpeed"
     SIG_RPM_DRIVE_MOTOR = "MotorLift_LD_ActualSpeed"
     SIG_MEASURED_WEIGHT = "General_LD_MeassuredWeight"
