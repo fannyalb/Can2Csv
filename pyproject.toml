@@ -1,8 +1,13 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "can2csv"
 version = "0.1.0"
 description = "Konvertiert Can-Daten von Bauer-Ladstaetter Projekt in CSV"
 requires-python = ">=3.10"
+
 
 dependencies = [
     "asammdf>=8.7.2",
@@ -14,3 +19,9 @@ dependencies = [
     "python-can>=4.6.1",
     "tkcalendar>=1.6.1"
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -20,10 +20,12 @@ IF NOT EXIST ".venv\" (
 )
 
 REM === Virtual Environment aktivieren ===
+echo Aktiviere Virtual Environment...
 call .venv\Scripts\activate.bat
 
 REM === pip aktualisieren ===
-python -m pip install --upgrade pip >nul
+echo Aktualisiere PIP...
+python -m pip install --upgrade pip setuptools wheel >nul
 
 REM === Projekt installieren (editable) ===
 echo 📦 Installiere Projekt...
