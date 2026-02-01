@@ -1,26 +1,22 @@
 from collections import defaultdict
-from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import logging
 
-from calculations import *
-from src.calculations import berechne_schlittenwinde_distanz
+from can2csv.machine_data import Laufwagen
+from can2csv.calculations import *
 
 log = logging.getLogger("Cantransform")
 import matplotlib.pyplot as plt
 from os import path
-from datetime import datetime, time
-from calculations import *
+from datetime import datetime
 
 import pandas as pd
 
 from asammdf import MDF
-import cantools
-from pandas.core.interchange.dataframe_protocol import DataFrame
 
-dbc_file = "../tests/data/typ1.dbc"
-mymdf_file = "../tests/data/typ1_bsp1.mf4"
+dbc_file = "../../tests/data/typ1.dbc"
+mymdf_file = "../../tests/data/typ1_bsp1.mf4"
 
 def decode_file(mdf_file: str, dbc_file: str) -> MDF:
     if not path.isfile(mdf_file):

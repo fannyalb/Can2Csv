@@ -1,11 +1,8 @@
-import csv
 import os
 
-import asammdf
-import pytest
 from asammdf import MDF
-from src.cantransform import *
 import pandas as pd
+from cantransform import *
 
 # Beispiel-Mockdateien (können kleine Testdateien sein)
 TEST_MDF_FILE = "data/typ1_bsp1.mf4"

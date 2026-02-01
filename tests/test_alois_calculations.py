@@ -1,10 +1,11 @@
 import os
+import logging
 
 import pandas as pd
 from asammdf import MDF
+from alois_calculations import *
+from cantransform import *
 
-import src.cantransform
-from src.alois_calculations import *
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -83,7 +84,7 @@ def test_extract_weight_events_all_files():
     speed_signal = "MotorDrive_LD_ActualSpeed"
 
     for mdf_file in mdf_paths:
-        decoded_mdf = src.cantransform.decode_file(mdf_file, dbc_file)
+        decoded_mdf = decode_file(mdf_file, dbc_file)
         machine_data = mdf_to_list_dict(decoded_mdf, [weight_signal,speed_signal])
         if not (machine_data and len(machine_data) > 0):
             continue
@@ -129,7 +130,7 @@ def test_print_weight():
 
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
     mdf_df = decoded_mdf.to_dataframe(channels=[weight_signal], time_as_date=True)
-    src.cantransform.print_signal(mdf_df)
+    print_signal(mdf_df)
 
 
 def test_print_speed():
@@ -139,7 +140,7 @@ def test_print_speed():
 
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
     mdf_df = decoded_mdf.to_dataframe(channels=[speed_signal], time_as_date=True)
-    src.cantransform.print_signal(mdf_df)
+    print_signal(mdf_df)
 
 
 def test_print_all():
@@ -149,7 +150,7 @@ def test_print_all():
 
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
     mdf_df = decoded_mdf.to_dataframe(channels=[weight_signal, speed_signal], time_as_date=True)
-    src.cantransform.print_signal(mdf_df)
+    print_signal(mdf_df)
 
 
 def test_print_many_files():
@@ -164,10 +165,10 @@ def test_print_many_files():
     weight_signal = "General_LD_MeassuredWeight"
     speed_signal = "MotorDrive_LD_ActualSpeed"
     speed_signal = "MotorLift_LD_ActualSpeed"
-    decoded_mdfs = [src.cantransform.decode_file(mdf, dbc_file) for mdf in mdf_paths[:10]]
+    decoded_mdfs = [ decode_file(mdf, dbc_file) for mdf in mdf_paths[:10]]
     dataframes = [ mdf.to_dataframe(channels=[weight_signal, speed_signal],time_as_date=True, raster=1) for mdf in decoded_mdfs]
     all_in_one_df = pd.concat(dataframes,
                             axis=0
                             ).sort_index()
     print(all_in_one_df)
-    src.cantransform.print_2_signals(all_in_one_df)
+    print_2_signals(all_in_one_df)

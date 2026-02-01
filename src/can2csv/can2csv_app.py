@@ -4,12 +4,10 @@ from enum import Enum
 from pathlib import Path
 from tkinter import filedialog, messagebox
 from tkinter import ttk
-from asammdf import MDF
-from src.cantransform import *
+from can2csv.cantransform import *
 import cantools
 import os
-from datetime import datetime, time, timezone
-from tkcalendar import DateEntry
+from datetime import datetime
 
 DT_FORMAT = "%Y-%m-%d %H:%M"
 
@@ -23,7 +21,7 @@ class ChoiceType(Enum):
     LAST_OUTPUT_DIR = "last_output_file"
 
 
-class MF4ExporterApp(tk.Tk):
+class Can2CsvApp(tk.Tk):
 
     def __init__(self):
         super().__init__()
@@ -306,5 +304,5 @@ class MF4ExporterApp(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = MF4ExporterApp()
+    app = Can2CsvApp()
     app.mainloop()

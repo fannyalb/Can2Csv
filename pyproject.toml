@@ -1,23 +1,21 @@
 [build-system]
-requires = ["setuptools>=64.0", "wheel"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "can2csv"
 version = "0.1.0"
-description = "Konvertiert Can-Daten von Bauer-Ladstaetter Projekt in CSV"
 requires-python = ">=3.10"
-
+description = "Konvertiert CAN-Daten von Bauer-Ladstaetter Projekt in CSV"
 
 dependencies = [
-    "asammdf>=8.7.2",
-    "cantools>=41.0.2",
-    "matplotlib>=3.10.8",
-    "numpy>=2.4.1",
-    "pandas>=2.3.3",
-    "pytest>=9.0.2",
-    "python-can>=4.6.1",
-    "tkcalendar>=1.6.1"
+    "asammdf",
+    "cantools",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "pytest",
+    "python-can"
 ]
 
 [tool.setuptools]

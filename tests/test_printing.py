@@ -1,9 +1,10 @@
 import os
 
-import src.cantransform
-from src.calculations import *
+import cantransform
+import pandas as pd
+from asammdf import MDF
 
-logging.basicConfig(level=logging.DEBUG)
+
 
 TEST_DBC_LW_FILE = "data/typ2.dbc"
 TEST_DBC_SW_FILE = "data/typ1.dbc"
@@ -20,7 +21,7 @@ def test_print_weight():
 
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
     mdf_df = decoded_mdf.to_dataframe(channels=[weight_signal], time_as_date=True)
-    src.cantransform.print_signal(mdf_df)
+    cantransform.print_signal(mdf_df)
 
 
 def test_print_speed():
@@ -30,7 +31,7 @@ def test_print_speed():
 
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW)
     mdf_df = decoded_mdf.to_dataframe(channels=[speed_signal], time_as_date=True)
-    src.cantransform.print_signal(mdf_df)
+    cantransform.print_signal(mdf_df)
 
 
 def test_print_all():
@@ -41,7 +42,7 @@ def test_print_all():
     decoded_mdf = MDF(TEST_DECODED_MDF_FILE_LW_2)
     mdf_df = decoded_mdf.to_dataframe(channels=[weight_signal, speed_signal], time_as_date=True)
     mdf_df[speed_signal] = mdf_df[speed_signal] / 10
-    src.cantransform.print_signal(mdf_df)
+    cantransform.print_signal(mdf_df)
 
 
 def test_print_many_files():
@@ -56,10 +57,10 @@ def test_print_many_files():
     weight_signal = "General_LD_MeassuredWeight"
     speed_signal = "MotorDrive_LD_ActualSpeed"
     speed_signal = "MotorLift_LD_ActualSpeed"
-    decoded_mdfs = [src.cantransform.decode_file(mdf, dbc_file) for mdf in mdf_paths[:10]]
+    decoded_mdfs = [cantransform.decode_file(mdf, dbc_file) for mdf in mdf_paths[:10]]
     dataframes = [ mdf.to_dataframe(channels=[weight_signal, speed_signal],time_as_date=True, raster=1) for mdf in decoded_mdfs]
     all_in_one_df = pd.concat(dataframes,
                               axis=0
                               ).sort_index()
     print(all_in_one_df)
-    src.cantransform.print_2_signals(all_in_one_df)
+    cantransform.print_2_signals(all_in_one_df)

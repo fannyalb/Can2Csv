@@ -1,9 +1,9 @@
-from src.cantransform import *
+from src.can2csv.cantransform import *
 
 import pandas as pd
 import numpy as np
 
-from src.machine_data import Laufwagen, Schlittenwagen
+from src.can2csv.machine_data import Laufwagen, Schlittenwagen
 
 log = logging.getLogger("Calcs")
 log.setLevel(logging.DEBUG)
