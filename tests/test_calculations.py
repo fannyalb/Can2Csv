@@ -1,4 +1,3 @@
-from src.calculations import *
 import os
 import pytest
 import logging
@@ -9,6 +8,8 @@ import pandas as pd
 
 from asammdf import MDF
 
+from machine_data import Laufwagen
+from calculations import *
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,7 +45,7 @@ def test_berechne_distanz_laufwagen():
 
     result = berechne_laufwagen_distanz(decoded_mdf.to_dataframe(channels=signals, time_as_date=True))
     # print(result)
-    gesamtdistanz = result["lw_strecke_cumsum_m"].tail(1)[0]
+    gesamtdistanz = result[Laufwagen.DISTANCE_CUMSUM.value].tail(1)[0]
     up = result["lw_strecke_up_cumsum_m"].tail(1)[0]
     down = result["lw_strecke_down_cumsum_m"].tail(1)[0]
     print(f'Gesamtdistanz LW: {gesamtdistanz}')

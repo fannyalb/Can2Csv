@@ -3,6 +3,8 @@ from src.cantransform import *
 import pandas as pd
 import numpy as np
 
+from src.machine_data import Laufwagen, Schlittenwinde
+
 log = logging.getLogger("Calcs")
 log.setLevel(logging.DEBUG)
 
@@ -24,8 +26,8 @@ def berechne_schlittenwinde_distanz(df: pd.DataFrame,
     dt.iloc[0] = 0.0
 
     streckendeltas = round((v_lin * dt),4)
-    result["sw_strecke_delta_m"] = streckendeltas
-    result["sw_strecke_cumsum_m"] = round(streckendeltas.cumsum(),4)
+    result[Schlittenwinde.DISTANCE_DELTA.value] = streckendeltas
+    result[Schlittenwinde.DISTANCE_CUMSUM.value] = round(streckendeltas.cumsum(),4)
     return result
 
 def berechne_laufwagen_distanz(df:pd.DataFrame) -> pd.DataFrame():
@@ -43,12 +45,12 @@ def berechne_laufwagen_distanz(df:pd.DataFrame) -> pd.DataFrame():
     streckendeltas = v_lin * dt
     ds_up = streckendeltas.clip(lower=0)       # if i < 0 : i = 0
     ds_down = abs(streckendeltas.clip(upper=0))   # if i > 0 : i = 0
-    result["lw_strecke_delta_m"] = round(streckendeltas, 0)
-    result["lw_strecke_up_delta_m"] = round(ds_up, 0)
-    result["lw_strecke_down_delta_m"] = round(ds_down, 0)
-    result["lw_strecke_up_cumsum_m"] = round(ds_up.cumsum(), 0)
-    result["lw_strecke_down_cumsum_m"] = round(ds_down.cumsum(), 0)
-    result["lw_strecke_cumsum_m"] = round(abs(streckendeltas).cumsum(), 0)
+    result[Laufwagen.DISTANCE_DELTA.value] = round(streckendeltas, 0)
+    result[Laufwagen.DISTANCE_UP_DELTA.value] = round(ds_up, 0)
+    result[Laufwagen.DISTANCE_DOWN_DELTA.value] = round(ds_down, 0)
+    result[Laufwagen.DISTANCE_UP_CUMSUM.value] = round(ds_up.cumsum(), 0)
+    result[Laufwagen.DISTANCE_DOWN_CUMSUM.value] = round(ds_down.cumsum(), 0)
+    result[Laufwagen.DISTANCE_CUMSUM.value] = round(abs(streckendeltas).cumsum(), 0)
     return result
 
 
@@ -73,17 +75,17 @@ def berechne_laufwagen_distanz_seil(df: pd.DataFrame,
     ds_release = delta_strecke_lastseil.clip(lower=0)       # if i < 0 : i = 0
     ds_pull = abs(delta_strecke_lastseil.clip(upper=0))   # if i > 0 : i = 0
 
-    result_df["lw_rope_delta_m"] = delta_strecke_lastseil
+    result_df[Laufwagen.ROPE_DISTANCE_DELTA.value] = delta_strecke_lastseil
     # Streckenaenderung Zuzug
-    result_df["lw_rope_pull_delta_m"] = ds_pull
+    result_df[Laufwagen.ROPE_PULL_DELTA.value] = ds_pull
     # Streckenaenderung Auslass
-    result_df["lw_rope_release_delta_m"] = ds_release
+    result_df[Laufwagen.ROPE_RELEASE_DELTA.value] = ds_release
     # Zuzug kumulierte Summe
-    result_df["lw_rope_pull_cumsum_m"] = ds_pull.cumsum()
+    result_df[Laufwagen.ROPE_PULL_CUMSUM.value] = ds_pull.cumsum()
     # Ablass kumulierte Summe
-    result_df["lw_rope_release_cumsum_m"] = abs(ds_release).cumsum() # if i > 0 : i = 0
+    result_df[Laufwagen.ROPE_RELEASE_CUMSUM.value] = abs(ds_release).cumsum() # if i > 0 : i = 0
     # Gesamtdistanz kumulierte Summe
-    result_df["lw_rope_cumsum_m"] = abs(delta_strecke_lastseil).cumsum()
+    result_df[Laufwagen.ROPE_DISTANCE_CUMSUM.value] = abs(delta_strecke_lastseil).cumsum()
     return result_df
 
 
@@ -231,13 +233,13 @@ def berechne_gewicht_in_bewegung(dframe: pd.DataFrame,
 
 
     # Gewicht zum Bewegungsstart zählen
-    result["lw_weight_mov_current_kg"] = 0.0
+    result[Laufwagen.WEIGHT_MOV_CUR.value] = 0.0
     for block_id in valid_blocks:
         start_time = movement_blocks.loc[block_id, "start_time"]
-        result.loc[start_time, "lw_weight_mov_current_kg"] = (
+        result.loc[start_time, Laufwagen.WEIGHT_MOV_CUR.value] = (
             df.loc)[start_time, sig_weight]
 
-    result["lw_weight_mov_cumsum_kg"] = result["lw_weight_mov_current_kg"].cumsum()
+    result[Laufwagen.WEIGHT_MOV_CUMSUM.value] = result[Laufwagen.WEIGHT_MOV_CUR.value].cumsum()
 
     # Aufräumen
     df.drop(columns=["_block_id","_weight_start_raw"], inplace=True)

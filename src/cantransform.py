@@ -105,30 +105,43 @@ def calculate_custom_values(decoded_mdfs) -> pd.DataFrame:
     # Schlittenwinde-Distanz
     sig_trommel_speed = "General_LD_TrommelSpeed"
     if sig_trommel_speed in ref_mdf.channels_db:
+        log.info("Schlittenwinde")
         sw_strecke = berechne_schlittenwinde_distanz(all_mdfs_df)
         custom_dfs.append(sw_strecke)
 
     # Laufwagen
-    sig_rpm_motor = "MotorLift_LD_ActualSpeed"
-    sig_weight = "General_LD_MeassuredWeight"
-    sig_state_of_charge = "General_LD_StateOfCharge"
-    if sig_rpm_motor in ref_mdf.channels_db:
-        lw_strecken = berechne_laufwagen_distanz_seil(all_mdfs_df)
-        custom_dfs.append(lw_strecken)
+    sig_rpm_lift_motor = Laufwagen.SIG_RPM_LIFT_MOTOR.value
+    sig_rpm_drive_motor = Laufwagen.SIG_RPM_DRIVE_MOTOR.value
+    sig_weight = Laufwagen.SIG_MEASURED_WEIGHT.value
+    sig_state_of_charge = Laufwagen.SIG_STATE_OF_CHARGE.value
+    channels = ref_mdf.channels_db.keys()
+    print(f"Channles {channels}")
 
-        if sig_weight in ref_mdf.channels_db:
+    if sig_rpm_lift_motor in channels:
+        log.info("Laufwagen")
+        print("ja")
+        lw_seil_strecken = berechne_laufwagen_distanz_seil(all_mdfs_df)
+        custom_dfs.append(lw_seil_strecken)
+
+        if sig_weight in channels:
             lw_gewicht_total = berechne_gewicht(all_mdfs_df)
             lw_gewicht_in_bewegung = berechne_gewicht_in_bewegung(all_mdfs_df)
             custom_dfs.append(lw_gewicht_total)
             custom_dfs.append(lw_gewicht_in_bewegung)
-        if sig_state_of_charge in ref_mdf.channels_db:
+
+        if sig_state_of_charge in channels:
             lw_state_of_charge = all_mdfs_df[sig_state_of_charge]
-            lw_state_of_charge = lw_state_of_charge.rename(columns={sig_state_of_charge:"lw_state_of_charge"})
             custom_dfs.append(lw_state_of_charge)
+
+    if sig_rpm_drive_motor in channels:
+        print("DriveMotor")
+        lw_strecken = berechne_laufwagen_distanz(all_mdfs_df)
+        custom_dfs.append(lw_strecken)
 
     if len(custom_dfs) > 0:
         df = combine_dfs(custom_dfs)
     return df
+
 
 def single_dataframe(decoded_mdfs: list[MDF]):
     dfs = [f.to_dataframe(time_as_date=True, raster=0.1) for f in decoded_mdfs]
@@ -139,11 +152,11 @@ def combine_dfs(dfs: list[pd.DataFrame]) -> pd.DataFrame:
     df = pd.concat(dfs)
     df = df.sort_index()
     df = df[~df.index.duplicated(keep='first')]
-    df = df.ffill()
+    df = df.ffill().bfill()
     return df
 
 
-def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list[str]):
+def export_to_csv(filename: str, decoded_mdfs: list[MDF], selected_signals: list[str], timegrid_s=0.1):
     bsp_mdf = decoded_mdfs[0]
     channel_grp_signals = get_channel_group_signals(bsp_mdf, selected_signals)
 
@@ -210,15 +223,18 @@ def print_signal(signal_df):
     plt.show(block=True)
 
 def print_custom_data(df):
-    if not len(df.columns):
+    if not len(df.columns) > 2:
+        print(f"{len(df.columns)} Spalten")
         raise Exception("Dataframe hat keine 2 Spalten")
-    gewicht = df["lw_weight_mov_cumsum_kg"][-1]
-    strecke = df["lw_strecke_cumsum_m"]
-    akkuverbrauch = df["lw_state_of_charge"]
+    gewicht = df[Laufwagen.WEIGHT_MOV_CUMSUM.value][-1]
+    strecke = df[Laufwagen.DISTANCE_CUMSUM.value]
+    akkuverbrauch = df[Laufwagen.SIG_STATE_OF_CHARGE.value]
 
     title = f'Custom Data'
-    ax = df.plot(y=akkuverbrauch, color="green", title=title)
-    df.plot(y=strecke, ax=ax.twinx())
+    ax = df.plot(strecke,
+                 akkuverbrauch,
+                 label=f'{gewicht} kg')
+    plt.title(title)
     plt.show(block=True)
 
 def print_2_signals(signal_df):

@@ -39,8 +39,11 @@ class MF4ExporterApp(tk.Tk):
         self.mdf_min_time = None
         self.mdf_max_time = None
         self.out_dir = None
+        self.mf4_folder_entry = None
         self.from_entry = None
         self.to_entry = None
+        self.timegrid_var = tk.StringVar(value="0.01")  # Default: 10 ms
+
 
         self._build_ui()
 
@@ -93,8 +96,8 @@ class MF4ExporterApp(tk.Tk):
         ttk.Label(frm, text="Export-Ordner").grid(row=12, column=0, sticky="w")
         self.csv_folder_entry = ttk.Entry(frm, width=75)
         self.csv_folder_entry.grid(row=12, column=1, sticky="w")
-        if self.last_paths and self.last_paths[ChoiceType.LAST_OUTPUT_DIR.value]:
-            self.csv_folder_entry.insert(0, self.last_paths[ChoiceType.LAST_OUTPUT_DIR.value])
+        if self.out_dir:
+            self.csv_folder_entry.insert(0, self.out_dir)
         ttk.Button(frm, text="Ordner wählen", command=self.select_csv_folder).grid(row=12, column=2)
 
         # Export-Dateiname
@@ -103,8 +106,11 @@ class MF4ExporterApp(tk.Tk):
         self.csv_filename_entry.grid(row=13, column=1, sticky="w")
         self.csv_filename_entry.insert(0, "output.csv")
 
+        ttk.Label(frm, text="Zeitraster [s]:").grid(row=14, column=0, sticky="w")
+        ttk.Entry(frm, textvariable=self.timegrid_var, width=10).grid(row=14, column=1, sticky="w")
+
         # Export-Button
-        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=15, column=0, pady=10)
+        ttk.Button(frm, text="CSV exportieren", command=self.export_csv).grid(row=16, column=0, pady=10)
 
     def safe_path(self, str_path: str):
         result = Path.home()
@@ -228,7 +234,7 @@ class MF4ExporterApp(tk.Tk):
             return
 
         if not self.out_dir:
-            messagebox.showerror("Fehler", "Bitte keinen Output-Ordner gewählt")
+            messagebox.showerror("Fehler", "Bitte einen Output-Ordner wählen")
             return
 
         out_filename = self.csv_filename_entry.get()
@@ -291,8 +297,7 @@ class MF4ExporterApp(tk.Tk):
         decoded_files = [ decode_file(mdf, self.dbc_file) for mdf in self.mf4_paths]
         custom_data = calculate_custom_values(decoded_files)
 
-        if custom_data["lw_state_of_charge"]:
-            print_custom_data(custom_data)
+        print_custom_data(custom_data)
 
 
 
@@ -306,6 +311,14 @@ class MF4ExporterApp(tk.Tk):
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(self.last_paths, f, indent=2)
 
+    def get_timegrid_seconds(self) -> float:
+        try:
+            value = float(self.timegrid_var.get())
+            if value <= 0:
+                raise ValueError
+            return value
+        except ValueError:
+            messagebox.showinfo("Fehler", "Zeitraster muss eine positive Zahl in Sekunden sein")
 
     def load_last_paths(self):
         if CONFIG_FILE.exists():
@@ -316,6 +329,8 @@ class MF4ExporterApp(tk.Tk):
                     self.dbc_file = ChoiceType.LAST_DBC.value
                 if self.last_paths[ChoiceType.LAST_MDF_DIR.value]:
                     self.mf4_folder_entry = ChoiceType.LAST_MDF_DIR.value
+                if self.last_paths[ChoiceType.LAST_OUTPUT_DIR.value]:
+                    self.out_dir = self.last_paths[ChoiceType.LAST_OUTPUT_DIR.value]
 
 
 if __name__ == "__main__":
